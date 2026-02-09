@@ -1,5 +1,7 @@
 package com.example.incedent_service.entities;
 
+import com.example.common.events.IncidentPriority;
+import com.example.common.events.IncidentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +19,6 @@ public class IncidentResponse {
     private String info;
     private LocalDateTime createdAt;
     private IncidentStatus status;
-    private String priority;
+    private IncidentPriority priority;
     private LocalDateTime updatedAt;
 }

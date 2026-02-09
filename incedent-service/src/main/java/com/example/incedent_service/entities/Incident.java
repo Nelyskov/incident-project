@@ -37,7 +37,7 @@ public class Incident {
     private IncidentStatus status;
 
     @Column(name = "priority")
-    private String priority;
+    private IncidentPriority priority;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -54,5 +54,18 @@ public class Incident {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public enum IncidentStatus{
+        CREATED,
+        PROCESSING,
+        COMPLETED,
+        CANCELED
+    }
+
+    public enum IncidentPriority {
+        HIGH,
+        MEDIUM,
+        LOW
     }
 }

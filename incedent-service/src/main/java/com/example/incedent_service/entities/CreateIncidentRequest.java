@@ -1,5 +1,6 @@
 package com.example.incedent_service.entities;
 
+import com.example.common.events.IncidentPriority;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,6 @@ public class CreateIncidentRequest {
     @NotBlank
     private String info;
 
-    private String priority;
+    private IncidentPriority priority;
 }
 

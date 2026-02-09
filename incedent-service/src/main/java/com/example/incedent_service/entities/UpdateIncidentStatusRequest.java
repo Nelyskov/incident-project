@@ -1,5 +1,6 @@
 package com.example.incedent_service.entities;
 
+import com.example.common.events.IncidentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
