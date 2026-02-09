@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "IncidentCreatedEvent",
+  "name": "Example",
   "namespace": "com.example.common.events",
   "fields": [
     {

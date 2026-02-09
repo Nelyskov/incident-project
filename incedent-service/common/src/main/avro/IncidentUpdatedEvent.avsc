@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "IncidentCreatedEvent",
+  "name": "IncidentUpdatedEvent",
   "namespace": "com.example.common.events",
   "fields": [
     {
@@ -10,6 +10,14 @@
     {
       "name": "service",
       "type": "string"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "IncidentStatus",
+        "symbols": ["CREATED", "PROCESSING", "COMPLETED", "CANCELLED"]
+      }
     },
     {
       "name": "priority",
