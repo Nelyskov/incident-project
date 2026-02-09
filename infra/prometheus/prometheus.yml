@@ -1,0 +1,25 @@
+# Конфигурация Prometheus
+# Этот файл определяет, какие метрики собирать и откуда
+
+global:
+  # Как часто собирать метрики
+  scrape_interval: 15s
+  # Таймаут для сбора метрик
+  scrape_timeout: 10s
+  # Как часто вычислять правила (если есть)
+  evaluation_interval: 15s
+
+# Конфигурация для сбора метрик
+scrape_configs:
+  # Имя job'а для идентификации источника метрик
+  - job_name: 'incedent-project-metrics'
+    # URL для сбора метрик (endpoint /actuator/prometheus)
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8080'   # incedent-service
+          - 'host.docker.internal:8081'   # incedent-producer-service
+          - 'host.docker.internal:8082'   # incedent-processor
+          - 'host.docker.internal:8083'   # alert-service
+        labels:
+          application: 'incedent-project'
+          environment: 'development'
