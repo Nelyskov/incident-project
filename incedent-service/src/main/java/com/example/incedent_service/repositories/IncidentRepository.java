@@ -12,6 +12,5 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
     Optional<Incident> findById(Long id);
     List<Incident> findByStatus(Incident.IncidentStatus status);
     List<Incident> findByService(String service);
-    List<Incident> findByStatusAndService(Incident.IncidentPriority priority, String service);
     List<Incident> findByPriority(Incident.IncidentPriority priority);
 }

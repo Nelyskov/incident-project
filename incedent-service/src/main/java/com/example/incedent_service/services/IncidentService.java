@@ -25,6 +25,7 @@ import java.util.List;
 public class IncidentService {
     private final KafkaTemplate<String, IncidentCreatedEvent> kafkaCreateTemplate;
     private final KafkaTemplate<String, IncidentUpdatedEvent> kafkaUpdateTemplate;
+
     private final IncidentRepository incidentRepository;
 
     private final Counter kafkaIncidentsCreated;
@@ -36,6 +37,7 @@ public class IncidentService {
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
     private static final String INCIDENT_UPDATE_PRIORITY_TOPIC = "incident-priority-update";
+    private static final String INCIDENT_FIND_TOPIC = "incident-find";
 
     public IncidentService(
             KafkaTemplate<String, IncidentCreatedEvent> kafkaCreateTemplate,
