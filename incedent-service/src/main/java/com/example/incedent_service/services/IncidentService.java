@@ -1,18 +1,17 @@
 package com.example.incedent_service.services;
 
-import com.example.common.events.IncidentCreateRequest;
-import com.example.common.events.IncidentPriority;
-import com.example.common.events.IncidentStatus;
-import com.example.common.events.IncidentUpdateRequest;
+import com.example.common.events.*;
+import com.example.incedent_service.entities.CreateIncidentRequest;
 import com.example.incedent_service.entities.Incident;
 import com.example.incedent_service.entities.IncidentFindRequest;
-import com.example.common.events.IncidentFindResponse;
 import com.example.incedent_service.entities.IncidentResponse;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,8 @@ import com.example.incedent_service.repositories.*;
 import java.sql.Time;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class IncidentService {
     private final Timer kafkaProcessingTimer;
 
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
+    private static final String INCIDENT_RESPONSE_TOPIC = "incident-response";
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
     private static final String INCIDENT_UPDATE_PRIORITY_TOPIC = "incident-priority-update";
     private static final String INCIDENT_FIND_REQUEST_TOPIC = "incident-find-request";
@@ -84,16 +86,17 @@ public class IncidentService {
 
     @KafkaListener(topics = INCIDENT_CREATE_TOPIC, groupId = "service-group")
     @Transactional
-    public void createIncident(IncidentCreateRequest request) {
+    public void createIncident(ConsumerRecord<String, IncidentCreatedEvent> request) {
         Timer.Sample timer = Timer.start();
+        String uuid = request.key();
 
         try {
             log.info("Create incident: " + request);
-
+           IncidentCreatedEvent event = request.value();
            Incident incident = Incident.builder()
-                    .service(request.getService())
-                    .info(request.getInfo())
-                    .priority(Incident.IncidentPriority.valueOf(request.getPriority().name()))
+                    .service(event.getService())
+                    .info(event.getInfo())
+                    .priority(Incident.IncidentPriority.valueOf(event.getPriority().name()))
                     .status(Incident.IncidentStatus.CREATED)
                     .build();
 
@@ -102,6 +105,26 @@ public class IncidentService {
 
             log.info("Incident created from Kafka. Id +" + incident.getId());
 
+
+            IncidentResponse response = IncidentResponse.builder()
+                    .id(incident.getId())
+                    .service(incident.getService())
+                    .info(incident.getInfo())
+                    .status(IncidentStatus.CREATED)
+                    .priority(IncidentPriority.valueOf(incident.getPriority().name()))
+                    .createdAt(incident.getCreatedAt())
+                    .updatedAt(incident.getUpdatedAt())
+                    .build();
+
+            kafkaTemplate.send(INCIDENT_RESPONSE_TOPIC, uuid, response)
+                    .whenComplete((result,ex) -> {
+                        if(ex == null)
+                        {
+                            log.info("Ответ отправлен" + incident);
+                        }else{
+                            log.error("Ошибка при отправке инцидента");
+                        }
+                    });
         } catch (Exception e) {
             kafkaProcessingErrors.increment();
             log.error("Error processing create incident :" + e.getMessage());
@@ -248,4 +271,5 @@ public class IncidentService {
             timer.stop(kafkaProcessingTimer);
         }
     }
+
 }
