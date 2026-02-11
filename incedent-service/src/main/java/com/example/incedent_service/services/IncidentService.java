@@ -1,6 +1,13 @@
 package com.example.incedent_service.services;
 
-import com.example.common.events.*;
+import com.example.common.events.IncidentCreateRequest;
+import com.example.common.events.IncidentPriority;
+import com.example.common.events.IncidentStatus;
+import com.example.common.events.IncidentUpdateRequest;
+import com.example.incedent_service.entities.Incident;
+import com.example.incedent_service.entities.IncidentFindRequest;
+import com.example.common.events.IncidentFindResponse;
+import com.example.incedent_service.entities.IncidentResponse;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -10,10 +17,11 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.incedent_service.entities.*;
 import com.example.incedent_service.repositories.*;
 
+import java.sql.Time;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +42,6 @@ public class IncidentService {
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
     private static final String INCIDENT_UPDATE_PRIORITY_TOPIC = "incident-priority-update";
     private static final String INCIDENT_FIND_REQUEST_TOPIC = "incident-find-request";
-    private static final String INCIDENT_FIND_RESPONSE_TOPIC = "incident-service-response";
 
     public IncidentService(
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -78,12 +85,12 @@ public class IncidentService {
     @KafkaListener(topics = INCIDENT_CREATE_TOPIC, groupId = "service-group")
     @Transactional
     public void createIncident(IncidentCreateRequest request) {
-        kafkaProcessingTimer = Timer.start();
+        Timer.Sample timer = Timer.start();
 
         try {
             log.info("Create incident: " + request);
 
-            Incident incident = Incident.builder()
+           Incident incident = Incident.builder()
                     .service(request.getService())
                     .info(request.getInfo())
                     .priority(Incident.IncidentPriority.valueOf(request.getPriority().name()))
@@ -106,20 +113,20 @@ public class IncidentService {
 
     @KafkaListener(topics = INCIDENT_UPDATE_STATUS_TOPIC, groupId = "service-group")
     @Transactional
-    public void updateIncidentStatus(IncidentUpdatedEvent event) {
+    public void updateIncidentStatus(IncidentUpdateRequest request) {
         Timer.Sample timer = Timer.start();
 
         try {
-            log.info("Update status id: " + event.getId());
+            log.info("Update status id: " + request.getId());
 
-            Incident incident = incidentRepository.findById(event.getId())
-                    .orElseThrow(() -> new RuntimeException("Incident not found by id: " + event.getId()));
+            Incident incident = incidentRepository.findById(request.getId())
+                    .orElseThrow(() -> new RuntimeException("Incident not found by id: " + request.getId()));
 
-            incident.setStatus(Incident.IncidentStatus.valueOf(event.getStatus().name()));
+            incident.setStatus(Incident.IncidentStatus.valueOf(request.getStatus().toString()));
             incidentRepository.save(incident);
             kafkaIncidentsUpdatedStatus.increment();
 
-            log.info("Incident status updated to: " + event.getStatus());
+            log.info("Incident status updated to: " + request.getStatus());
 
         } catch (Exception e) {
             kafkaProcessingErrors.increment();
@@ -132,16 +139,16 @@ public class IncidentService {
 
     @KafkaListener(topics = INCIDENT_UPDATE_PRIORITY_TOPIC, groupId = "service-group")
     @Transactional
-    public void updateIncidentPriority(IncidentUpdatedEvent event) {
+    public void updateIncidentPriority(IncidentUpdateRequest request) {
         Timer.Sample timer = Timer.start();
 
         try {
-            log.info("Update priority: " + event.getId());
+            log.info("Update priority: " + request.getId());
 
-            Incident incident = incidentRepository.findById(event.getId())
-                    .orElseThrow(() -> new RuntimeException("Incident not found by id: " + event.getId()));
+            Incident incident = incidentRepository.findById(request.getId())
+                    .orElseThrow(() -> new RuntimeException("Incident not found by id: " + request.getId()));
 
-            incident.setPriority(Incident.IncidentPriority.valueOf(event.getPriority().name()));
+            incident.setPriority(Incident.IncidentPriority.valueOf(request.getPriority().toString()));
             incidentRepository.save(incident);
             kafkaIncidentsUpdatedPriority.increment();
 
@@ -167,23 +174,78 @@ public class IncidentService {
                 .stream().map(this::mapToResponse).toList();
     }
 
-    private IncidentResponse mapToResponse(Incident incident) {
-        return IncidentResponse.builder()
-                .id(incident.getId())
-                .service(incident.getService())
-                .info(incident.getInfo())
-                .status(convertStatus(incident.getStatus()))
-                .priority(convertPriority(incident.getPriority()))
-                .createdAt(incident.getCreatedAt())
-                .updatedAt(incident.getUpdatedAt())
-                .build();
-    }
-
+    ///  из Incident (сущность в entities) в avro
     private IncidentStatus convertStatus(Incident.IncidentStatus status) {
         return IncidentStatus.valueOf(status.name());
     }
 
     private IncidentPriority convertPriority(Incident.IncidentPriority priority) {
         return IncidentPriority.valueOf(priority.name());
+    }
+
+    private IncidentResponse mapToResponse(Incident incident) {
+        return IncidentResponse.builder()
+                .id(incident.getId())
+                .service(incident.getService())
+                .info(incident.getInfo())
+                .status(com.example.common.events.IncidentStatus.valueOf(incident.getStatus().name()))
+                .priority(com.example.common.events.IncidentPriority.valueOf(incident.getPriority().name()))
+                .createdAt(incident.getCreatedAt())
+                .updatedAt(incident.getUpdatedAt())
+                .build();
+    }
+
+    private com.example.common.events.Incident mapToAvroIncident(Incident incident) {
+        return com.example.common.events.Incident.newBuilder()
+                .setId(incident.getId())
+                .setService(incident.getService())
+                .setInfo(incident.getInfo())
+                .setStatus(com.example.common.events.IncidentStatus.valueOf(incident.getStatus().name()))
+                .setPriority(com.example.common.events.IncidentPriority.valueOf(incident.getPriority().name()))
+                .setTimestamp(incident.getUpdatedAt() != null ?
+                        incident.getUpdatedAt().toEpochSecond(java.time.ZoneOffset.UTC) * 1000 :
+                        incident.getCreatedAt().toEpochSecond(java.time.ZoneOffset.UTC) * 1000)
+                .build();
+    }
+
+    @KafkaListener(topics = INCIDENT_FIND_REQUEST_TOPIC, groupId = "service-group")
+    public void findIncidents(IncidentFindRequest request){
+        Timer.Sample timer = Timer.start();
+        try {
+            log.info("Запрос на поиск инцидентов: {}", request);
+
+            List<com.example.common.events.Incident> avroIncidents = new ArrayList<>();
+
+            if (request.getId() != null) {
+                incidentRepository.findById(request.getId())
+                        .map(this::mapToAvroIncident)
+                        .ifPresent(avroIncidents::add);
+            } else {
+                avroIncidents = incidentRepository.findAll()
+                        .stream()
+                        .map(this::mapToAvroIncident)
+                        .toList();
+            }
+
+            IncidentFindResponse response = IncidentFindResponse.newBuilder()
+                    .setIncidents(avroIncidents)
+                    .build();
+
+            kafkaTemplate.send("incident-find-response", response);
+            kafkaIncidentsFound.increment();
+
+            log.info("Найдено инцидентов" + avroIncidents.size());
+
+        } catch (Exception e) {
+            kafkaProcessingErrors.increment();
+            log.error("Ошибка при поиске инцидентов: " + e.getMessage());
+
+            IncidentFindResponse errorResponse = IncidentFindResponse.newBuilder()
+                    .setIncidents(new ArrayList<>())
+                    .build();
+            kafkaTemplate.send("incident-find-response", errorResponse);
+        } finally {
+            timer.stop(kafkaProcessingTimer);
+        }
     }
 }
