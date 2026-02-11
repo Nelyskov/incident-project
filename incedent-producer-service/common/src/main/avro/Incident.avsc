@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "IncidentUpdatedEvent",
+  "name": "Incident",
   "namespace": "com.example.common.events",
   "fields": [
     {
