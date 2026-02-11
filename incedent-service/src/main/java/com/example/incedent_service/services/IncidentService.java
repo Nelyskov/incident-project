@@ -1,12 +1,6 @@
 package com.example.incedent_service.services;
 
-import com.example.common.events.IncidentCreatedEvent;
-import com.example.common.events.IncidentUpdatedEvent;
-import com.example.common.events.IncidentPriority;
-import com.example.common.events.IncidentStatus;
-import com.example.incedent_service.entities.Incident;
-import com.example.incedent_service.entities.IncidentResponse;
-import com.example.incedent_service.repositories.IncidentRepository;
+import com.example.common.events.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -16,6 +10,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.incedent_service.entities.*;
+import com.example.incedent_service.repositories.*;
 
 import java.util.List;
 
@@ -23,30 +19,29 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class IncidentService {
-    private final KafkaTemplate<String, IncidentCreatedEvent> kafkaCreateTemplate;
-    private final KafkaTemplate<String, IncidentUpdatedEvent> kafkaUpdateTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private final IncidentRepository incidentRepository;
 
     private final Counter kafkaIncidentsCreated;
     private final Counter kafkaIncidentsUpdatedStatus;
     private final Counter kafkaIncidentsUpdatedPriority;
+    private final Counter kafkaIncidentsFound;
     private final Counter kafkaProcessingErrors;
     private final Timer kafkaProcessingTimer;
 
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
     private static final String INCIDENT_UPDATE_PRIORITY_TOPIC = "incident-priority-update";
-    private static final String INCIDENT_FIND_TOPIC = "incident-find";
+    private static final String INCIDENT_FIND_REQUEST_TOPIC = "incident-find-request";
+    private static final String INCIDENT_FIND_RESPONSE_TOPIC = "incident-service-response";
 
     public IncidentService(
-            KafkaTemplate<String, IncidentCreatedEvent> kafkaCreateTemplate,
-            KafkaTemplate<String, IncidentUpdatedEvent> kafkaUpdateTemplate,
+            KafkaTemplate<String, Object> kafkaTemplate,
             IncidentRepository incidentRepository,
             MeterRegistry meterRegistry) {
 
-        this.kafkaCreateTemplate = kafkaCreateTemplate;
-        this.kafkaUpdateTemplate = kafkaUpdateTemplate;
+        this.kafkaTemplate = kafkaTemplate;
         this.incidentRepository = incidentRepository;
 
         this.kafkaIncidentsCreated = Counter.builder("incidents.kafka.created.total")
@@ -73,20 +68,25 @@ public class IncidentService {
                 .description("Processing kafka timer")
                 .tag("source", "kafka")
                 .register(meterRegistry);
+
+        kafkaIncidentsFound = Counter.builder("incidents.kafka.found.total")
+                .description("Произвдеенных поисков")
+                .tag("source", "kafka")
+                .register(meterRegistry);
     }
 
     @KafkaListener(topics = INCIDENT_CREATE_TOPIC, groupId = "service-group")
     @Transactional
-    public void createIncident(IncidentCreatedEvent event) {
-        Timer.Sample timer = Timer.start();
+    public void createIncident(IncidentCreateRequest request) {
+        kafkaProcessingTimer = Timer.start();
 
         try {
-            log.info("Create incident: " + event);
+            log.info("Create incident: " + request);
 
             Incident incident = Incident.builder()
-                    .service(event.getService())
-                    .info(event.getInfo())
-                    .priority(Incident.IncidentPriority.valueOf(event.getPriority().name()))
+                    .service(request.getService())
+                    .info(request.getInfo())
+                    .priority(Incident.IncidentPriority.valueOf(request.getPriority().name()))
                     .status(Incident.IncidentStatus.CREATED)
                     .build();
 

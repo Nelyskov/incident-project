@@ -1,8 +1,8 @@
 package com.example.incedent_service.repositories;
 
-import com.example.incedent_service.entities.Incident;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import com.example.incedent_service.entities.*;
 
 import java.util.List;
 import java.util.Optional;
