@@ -1,6 +1,7 @@
 package com.example.incedent_producer_service.controller;
 
 
+import com.example.incedent_producer_service.entities.CreateIncidentRequest;
 import com.example.incedent_producer_service.services.IncidentProducerService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

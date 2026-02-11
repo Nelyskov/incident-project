@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "InfoMessageToIncidentProcessor",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "incident",
+      "type": "Incident"
+    },
+    {
+      "name": "priority",
+      "type": {
+        "type": "enum",
+        "name": "IncidentPriority",
+        "symbols": ["HIGH", "MEDIUM", "LOW"]
+      }
+    }
+  ]
+}
