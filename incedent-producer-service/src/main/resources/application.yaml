@@ -15,6 +15,9 @@ server:
   port: 8082
 
 spring:
+  application:
+    name: incedent-producer-service
+    
   kafka:
     bootstrap-servers: localhost:9092
     schema-registry-url: http://localhost:8081
