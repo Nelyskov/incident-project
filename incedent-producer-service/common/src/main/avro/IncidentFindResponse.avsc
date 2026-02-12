@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "IncidentFindResponse",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "incidents",
+      "type": {
+        "type": "array",
+        "items": "Incident"
+      }
+    }
+  ]
+}
