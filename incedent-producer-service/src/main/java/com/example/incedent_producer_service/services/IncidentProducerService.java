@@ -22,7 +22,8 @@ import java.util.concurrent.*;
 public class IncidentProducerService {
 
     private  final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ConcurrentHashMap<String, CompletableFuture<IncidentCreatedEvent>> pendingRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CompletableFuture<IncidentCreatedEvent>> pendingCreateRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CompletableFuture<IncidentFindResponse>> pendingFindRequests = new ConcurrentHashMap<>();
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
     private static final String INCIDENT_RESPONSE_TOPIC = "incident-response";
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
@@ -33,7 +34,7 @@ public class IncidentProducerService {
     public IncidentCreatedEvent createIncident(CreateIncidentRequest request) throws ExecutionException, InterruptedException, TimeoutException {
         String uuid = java.util.UUID.randomUUID().toString();
         CompletableFuture<IncidentCreatedEvent> future = new CompletableFuture<>();
-        pendingRequests.put(uuid, future);
+        pendingCreateRequests.put(uuid, future);
 
         IncidentCreatedEvent event = IncidentCreatedEvent.newBuilder()
                 .setId(0l)
@@ -52,12 +53,12 @@ public class IncidentProducerService {
                     else {
                         log.error("Ошибка при отправке");
                         future.completeExceptionally(ex);
-                        pendingRequests.remove(uuid);
+                        pendingCreateRequests.remove(uuid);
                     }
                 });
 
         IncidentCreatedEvent incidentCreated = future.get(30, TimeUnit.SECONDS);
-        pendingRequests.remove(uuid);
+        pendingCreateRequests.remove(uuid);
         log.info("Инцидент создан в бд");
         if (incidentCreated.getPriority() == IncidentPriority.HIGH) {
             kafkaTemplate.send(INCIDENT_HIGH_PRIORITY_ALERT, incidentCreated);
@@ -67,8 +68,26 @@ public class IncidentProducerService {
         return incidentCreated;
     }
 
-    public IncidentFindResponse findIncidents(IncidentFindRequest request){
-    
+    public IncidentFindResponse findIncidents(IncidentFindRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+        String uuid = java.util.UUID.randomUUID().toString();
+        CompletableFuture<IncidentFindResponse> future = new CompletableFuture<>();
+        pendingFindRequests.put(uuid, future);
+
+        kafkaTemplate.send(INCIDENT_FIND_TOPIC, uuid, request)
+                .whenComplete((result, ex) -> {
+                    if(ex == null){
+                        log.info("Событие отправлено");
+                    }
+                    else {
+                        log.error("Ошибка при отправке");
+                        future.completeExceptionally(ex);
+                        pendingCreateRequests.remove(uuid);
+                    }
+                });
+        IncidentFindResponse response = future.get(30, TimeUnit.SECONDS);
+        pendingCreateRequests.remove(uuid);
+        log.info("Событие получено");
+        return response;
     }
 
 }

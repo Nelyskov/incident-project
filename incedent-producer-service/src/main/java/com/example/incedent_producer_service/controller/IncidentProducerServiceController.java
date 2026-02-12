@@ -3,6 +3,8 @@ package com.example.incedent_producer_service.controller;
 
 import com.example.common.events.IncidentCreatedEvent;
 import com.example.incedent_producer_service.entities.CreateIncidentRequest;
+import com.example.incedent_producer_service.entities.IncidentFindRequest;
+import com.example.incedent_producer_service.entities.IncidentFindResponse;
 import com.example.incedent_producer_service.services.IncidentProducerService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -65,20 +67,20 @@ public class IncidentProducerServiceController {
             }
         });
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> getIncidentById(@PathVariable long id) throws Exception{
+    @GetMapping("/{ID}")
+    public ResponseEntity<Object> getIncidentById(@PathVariable Long ID) throws Exception{
         totalRequestCounter.increment();
-
+        IncidentFindRequest request = IncidentFindRequest.builder()
+                .id(ID).build();
         try {
-            // Отправляем запрос на получение инцидента по ID
-            IncidentCreatedEvent incident = service.findIncidentById(id);
+            IncidentFindResponse incident = service.findIncidents(request);
 
             if (incident != null) {
                 return ResponseEntity.ok(incident);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Инцидент не найден");
-                errorResponse.put("message", "Инцидент с не найден " + id );
+                errorResponse.put("message", "Инцидент не найден " + ID );
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
         } catch (Exception e) {
@@ -88,9 +90,35 @@ public class IncidentProducerServiceController {
         }
     }
 
-    @GetMapping()
-    public ResponseEntity<Object> getAllIncidents() throws Exception{
-        return ResponseEntity.ok("ok");
+    @GetMapping
+    public ResponseEntity<Object> getAllIncidents(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String service,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String status) {
+        totalRequestCounter.increment();
+        IncidentFindRequest request = IncidentFindRequest.builder()
+                .id(null)
+                .service(null)
+                .status(null)
+                .priority(null)
+                .build();
+        try {
+            IncidentFindResponse incident =  this.service.findIncidents(request);
+
+            if (incident != null) {
+                return ResponseEntity.ok(incident);
+            } else {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Инцидент не найден");
+                errorResponse.put("message", "Инциденты не найдены " );
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (Exception e) {
+            totalErrorCounter.increment();
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
     }
 
 
