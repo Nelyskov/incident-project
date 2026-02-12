@@ -1,0 +1,31 @@
+{
+  "type": "record",
+  "name": "IncidentCreatedEvent",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "priority",
+      "type": {
+        "type": "enum",
+        "name": "IncidentPriority",
+        "symbols": ["HIGH", "MEDIUM", "LOW"]
+      }
+    },
+    {
+      "name": "info",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    }
+  ]
+}
