@@ -1,17 +1,20 @@
 package com.example.incedent_producer_service.controller;
 
 
+import com.example.common.events.IncidentCreatedEvent;
 import com.example.incedent_producer_service.entities.CreateIncidentRequest;
 import com.example.incedent_producer_service.services.IncidentProducerService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping("/api/incident-producer-service")
@@ -21,7 +24,7 @@ public class IncidentProducerServiceController {
     private final Counter totalErrorCounter;
     private final Timer proccessingTimer;
 
-    public IncidentProducerServiceController(IncidentProducerService service, MeterRegistry registry){
+    public IncidentProducerServiceController(IncidentProducerService service, MeterRegistry registry) {
         this.service = service;
 
         totalRequestCounter = Counter.builder("incident-producer-service.requests.total")
@@ -40,18 +43,54 @@ public class IncidentProducerServiceController {
     }
 
     @PostMapping()
-    public ResponseEntity<Object> createIncident(@RequestBody CreateIncidentRequest request) throws Exception{
+    public ResponseEntity<Object> createIncident(@RequestBody CreateIncidentRequest request) throws Exception {
+        totalRequestCounter.increment();
+        return proccessingTimer.record(() -> {
+            try {
+                IncidentCreatedEvent createdEvent = service.createIncident(request);
 
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "Инцидент успешно создан");
+                response.put("incidentId", createdEvent.getId());
+                response.put("priority", createdEvent.getPriority());
+                response.put("timestamp", createdEvent.getTimestamp());
+                response.put("status", "PENDING");
+
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+            }  catch (Exception e) {
+                totalErrorCounter.increment();
+
+                return ResponseEntity.internalServerError().body(e.getMessage());
+            }
+        });
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<Object> getIncidentById(@PathVariable long id) throws Exception{
+        totalRequestCounter.increment();
 
+        try {
+            // Отправляем запрос на получение инцидента по ID
+            IncidentCreatedEvent incident = service.findIncidentById(id);
+
+            if (incident != null) {
+                return ResponseEntity.ok(incident);
+            } else {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Инцидент не найден");
+                errorResponse.put("message", "Инцидент с не найден " + id );
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+        } catch (Exception e) {
+            totalErrorCounter.increment();
+
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
     @GetMapping()
     public ResponseEntity<Object> getAllIncidents() throws Exception{
-
+        return ResponseEntity.ok("ok");
     }
 
 
@@ -93,3 +132,5 @@ public class IncidentProducerServiceController {
         return ResponseEntity.ok(metrics);
     }
 }
+
+

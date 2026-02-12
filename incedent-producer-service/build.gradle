@@ -30,9 +30,9 @@ repositories {
 }
 
 dependencies {
-
+    implementation project(':common')
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -46,13 +46,13 @@ dependencies {
     implementation 'io.confluent:kafka-avro-serializer:7.5.0'
     implementation 'io.confluent:kafka-streams-avro-serde:7.5.0'
     implementation 'org.projectlombok:lombok:1.18.30'
-
+}
 // Отклбчение тестов
 //	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
 //	testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
 //	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 //	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+//}
 //Отключение тестов
 //tasks.named('test') {
 //	useJUnitPlatform()

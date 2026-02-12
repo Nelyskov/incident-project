@@ -1,12 +1,11 @@
 package com.example.incedent_producer_service.entities;
 
-import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
+
 
 import java.time.LocalDateTime;
 
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+
 public class Incident {
     private Long id;
     private String service;
@@ -30,7 +29,7 @@ public class Incident {
             status = IncidentStatus.CREATED;
         }
     }
-    @PreUpdate
+
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }

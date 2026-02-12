@@ -5,6 +5,8 @@ import com.example.common.events.IncidentPriority;
 import com.example.incedent_producer_service.config.KafkaConfig;
 import com.example.incedent_producer_service.entities.CreateIncidentRequest;
 import com.example.incedent_producer_service.entities.Incident;
+import com.example.incedent_producer_service.entities.IncidentFindRequest;
+import com.example.incedent_producer_service.entities.IncidentFindResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,9 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class IncidentProducerService {
 
     private  final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ConcurrentHashMap<String, CompletableFuture<Incident>> pendingRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CompletableFuture<IncidentCreatedEvent>> pendingRequests = new ConcurrentHashMap<>();
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
     private static final String INCIDENT_RESPONSE_TOPIC = "incident-response";
     private static final String INCIDENT_UPDATE_STATUS_TOPIC = "incident-status-update";
@@ -30,9 +30,9 @@ public class IncidentProducerService {
     private static final String INCIDENT_FIND_TOPIC = "incident-find";
     private static final String INCIDENT_HIGH_PRIORITY_ALERT = "high-priority-alert";
 
-    public IncidentCreatedEvent createIncident(CreateIncidentRequest request){
+    public IncidentCreatedEvent createIncident(CreateIncidentRequest request) throws ExecutionException, InterruptedException, TimeoutException {
         String uuid = java.util.UUID.randomUUID().toString();
-        CompletableFuture<Incident> future = new CompletableFuture<>();
+        CompletableFuture<IncidentCreatedEvent> future = new CompletableFuture<>();
         pendingRequests.put(uuid, future);
 
         IncidentCreatedEvent event = IncidentCreatedEvent.newBuilder()
@@ -56,16 +56,19 @@ public class IncidentProducerService {
                     }
                 });
 
-        IncidentCreatedEvent incidentCreated = (IncidentCreatedEvent) future.get(30, TimeUnit.SECONDS);
+        IncidentCreatedEvent incidentCreated = future.get(30, TimeUnit.SECONDS);
+        pendingRequests.remove(uuid);
         log.info("Инцидент создан в бд");
-        return incidentCreated;
-
-
-        if(event.getPriority() == IncidentPriority.HIGH){
-            kafkaTemplate.send(INCIDENT_HIGH_PRIORITY_ALERT, event);
+        if (incidentCreated.getPriority() == IncidentPriority.HIGH) {
+            kafkaTemplate.send(INCIDENT_HIGH_PRIORITY_ALERT, incidentCreated);
+            log.info("Высокий приоритет");
         }
 
+        return incidentCreated;
     }
 
+    public IncidentFindResponse findIncidents(IncidentFindRequest request){
+    
+    }
 
 }

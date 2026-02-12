@@ -1,6 +1,6 @@
 package com.example.incedent_producer_service.entities;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
