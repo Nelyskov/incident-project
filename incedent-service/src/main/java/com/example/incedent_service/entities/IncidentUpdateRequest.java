@@ -1,6 +1,6 @@
 package com.example.incedent_service.entities;
 
-import com.example.common.events.IncidentStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,17 @@ import org.antlr.v4.runtime.misc.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateIncidentStatusRequest {
+
+public class IncidentUpdateRequest {
     @NotNull
-    private IncidentStatus status;
+    private Long id;
+
+    private String service;
+
+    private String info;
+
+    private Incident.IncidentStatus status;
+
+    private Incident.IncidentPriority priority;
 }
+

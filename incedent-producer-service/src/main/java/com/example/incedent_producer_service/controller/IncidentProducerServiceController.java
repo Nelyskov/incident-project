@@ -1,10 +1,7 @@
 package com.example.incedent_producer_service.controller;
 
 
-import com.example.common.events.IncidentCreatedEvent;
-import com.example.incedent_producer_service.entities.CreateIncidentRequest;
-import com.example.incedent_producer_service.entities.IncidentFindRequest;
-import com.example.incedent_producer_service.entities.IncidentFindResponse;
+import com.example.incedent_producer_service.entities.*;
 import com.example.incedent_producer_service.services.IncidentProducerService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -16,18 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping("/api/incident-producer-service")
 public class IncidentProducerServiceController {
     private final IncidentProducerService service;
+    private final MeterRegistry meterRegistry;
     private final Counter totalRequestCounter;
     private final Counter totalErrorCounter;
     private final Timer proccessingTimer;
 
-    public IncidentProducerServiceController(IncidentProducerService service, MeterRegistry registry) {
+    public IncidentProducerServiceController(IncidentProducerService service, MeterRegistry meterRegistry, MeterRegistry registry) {
         this.service = service;
+        this.meterRegistry = meterRegistry;
 
         totalRequestCounter = Counter.builder("incident-producer-service.requests.total")
                 .description("Общее количество запросов REST в incident producer service ")
@@ -44,19 +42,21 @@ public class IncidentProducerServiceController {
                 .register(registry);
     }
 
-    @PostMapping()
-    public ResponseEntity<Object> createIncident(@RequestBody CreateIncidentRequest request) throws Exception {
+    @PostMapping("/create")
+    public ResponseEntity<Object> createIncident(@RequestBody IncidentCreateRequest request) throws Exception {
         totalRequestCounter.increment();
         return proccessingTimer.record(() -> {
             try {
-                IncidentCreatedEvent createdEvent = service.createIncident(request);
+                IncidentCreateResponse createdEvent = service.createIncident(request);
 
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "Инцидент успешно создан");
                 response.put("incidentId", createdEvent.getId());
+                response.put("service", createdEvent.getService());
+                response.put("info", createdEvent.getInfo());
                 response.put("priority", createdEvent.getPriority());
-                response.put("timestamp", createdEvent.getTimestamp());
-                response.put("status", "PENDING");
+                response.put("status", createdEvent.getStatus());
+                response.put("time", createdEvent.getCreatedAt());
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
@@ -67,6 +67,32 @@ public class IncidentProducerServiceController {
             }
         });
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<Object> updateIncident(@RequestBody IncidentUpdateRequest request) throws Exception{
+        totalRequestCounter.increment();
+        return proccessingTimer.recordCallable(() -> {
+            try{
+                IncidentUpdateResponse updateResponse=  service.updateIncident(request);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "Инцидент успешно обновлен");
+                response.put("incidentId", updateResponse.getId());
+                response.put("service", updateResponse.getService());
+                response.put("info", updateResponse.getInfo());
+                response.put("status", updateResponse.getStatus());
+                response.put("priority", updateResponse.getPriority());
+                response.put("updatedAt", updateResponse.getUpdatedAt());
+
+                return ResponseEntity.ok(response);
+
+            } catch (Exception e) {
+                totalErrorCounter.increment();
+                return ResponseEntity.internalServerError().body(e.getMessage());
+            }
+        });
+    }
+
     @GetMapping("/{ID}")
     public ResponseEntity<Object> getIncidentById(@PathVariable Long ID) throws Exception{
         totalRequestCounter.increment();
@@ -75,7 +101,7 @@ public class IncidentProducerServiceController {
         try {
             IncidentFindResponse incident = service.findIncidents(request);
 
-            if (incident != null) {
+            if (incident.getIncidentList().isEmpty()) {
                 return ResponseEntity.ok(incident);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
@@ -98,22 +124,14 @@ public class IncidentProducerServiceController {
             @RequestParam(required = false) String status) {
         totalRequestCounter.increment();
         IncidentFindRequest request = IncidentFindRequest.builder()
-                .id(null)
-                .service(null)
-                .status(null)
-                .priority(null)
+                .id(id)
+                .service(service)
+                .status(status != null ? Incident.IncidentStatus.valueOf(status) : null)
+                .priority(priority != null ? Incident.IncidentPriority.valueOf(priority) : null)
                 .build();
         try {
-            IncidentFindResponse incident =  this.service.findIncidents(request);
-
-            if (incident != null) {
-                return ResponseEntity.ok(incident);
-            } else {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Инцидент не найден");
-                errorResponse.put("message", "Инциденты не найдены " );
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-            }
+            IncidentFindResponse incident = this.service.findIncidents(request);
+            return ResponseEntity.ok(incident);
         } catch (Exception e) {
             totalErrorCounter.increment();
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -158,6 +176,14 @@ public class IncidentProducerServiceController {
                 "incident-producer-service.error.total"
         ));
         return ResponseEntity.ok(metrics);
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String,String>> health(){
+        Map<String, String> status = new HashMap<>();
+        status.put("status", "UP");
+        status.put("service", "incident-producer-service");
+        return ResponseEntity.ok(status);
     }
 }
 

@@ -1,24 +1,21 @@
 package com.example.incedent_service.entities;
 
-import com.example.common.events.IncidentPriority;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateIncidentRequest {
-    @NotBlank
+public class IncidentUpdateResponse {
+    private Long id;
     private String service;
-
-    @NotBlank
     private String info;
-
-    private IncidentPriority priority;
+    private Incident.IncidentStatus status;
+    private Incident.IncidentPriority priority;
+    private LocalDateTime updatedAt;
 }
-

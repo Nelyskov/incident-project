@@ -20,10 +20,10 @@ import java.util.function.Consumer;
 
 @Configuration
 public class KafkaConfig {
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.schema-registry-url:http://localhost:8081}")
+    @Value("${spring.kafka.schema-registry-url}")
     private String schemaRegistryUrl;
 
     @Bean

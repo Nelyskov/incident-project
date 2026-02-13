@@ -1,9 +1,6 @@
 package com.example.incedent_service.controller;
 
-import com.example.incedent_service.entities.CreateIncidentRequest;
-import com.example.incedent_service.entities.Incident;
-import com.example.incedent_service.entities.IncidentResponse;
-import com.example.incedent_service.entities.UpdateIncidentStatusRequest;
+
 import com.example.incedent_service.services.IncidentService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Counter;
@@ -19,94 +16,39 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/incident-service")
 public class IncidentServiceController {
-//    private final IncidentService incidentService;
+    private final IncidentService incidentService;
+    private final MeterRegistry meterRegistry;
+
     private final Counter requestCounter;
-//    private final Counter incidentCreatedCounter;
-//    private final Counter incidentUpdatedCounter;
     private final Counter incidentErrorCounter;
     private final Timer incidentProcessigTimer;
 
-    public IncidentServiceController( MeterRegistry meterRegistry){
-//        incidentService = service;
+    public IncidentServiceController(IncidentService incidentService, MeterRegistry meterRegistry1, MeterRegistry meterRegistry){
+        this.incidentService = incidentService;
+        this.meterRegistry = meterRegistry1;
         this.requestCounter = Counter.builder("incident-service.requests.total")
-                .description("Общее количество запросов в IncidentService")
+                .description("Общее количество REST запросов")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
 
-//        incidentCreatedCounter = Counter.builder("incident-service.incidents.created.total")
-//                .description("Общее количество запросов созданных инцидентов x")
-//                .tag("application", "incident-service")
-//                .register(meterRegistry);
-//        incidentUpdatedCounter = Counter.builder("incident-service.incidents.updated.total")
-//                .description("Общее количество запросов обновленных инцидентов")
-//                .tag("application", "incident-service")
-//                .register(meterRegistry);
+
         incidentProcessigTimer = Timer.builder("incident-service.processing.timer")
-                .description("Время обработки запросов")
+                .description("Время обработки REST запросов")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
         incidentErrorCounter = Counter.builder("incident-service.incidents.error.total")
-                .description("Общее количество ошибок")
+                .description("Общее количество ошибок в REST запросах")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
     }
 
-//    @PostMapping()
-//    public ResponseEntity<IncidentResponse> createIncident(@RequestBody CreateIncidentRequest request) throws Exception{
-//        return incidentProcessigTimer.recordCallable(() -> {
-//            try{
-//                requestCounter.increment();
-//                IncidentResponse response = incidentService.createIncident(request);
-//                incidentCreatedCounter.increment();
-//                return ResponseEntity.ok(response);
-//            } catch (Exception e) {
-//                incidentErrorCounter.increment();
-//                throw new RuntimeException(e);
-//            }
-//        });
-//    }
-
-//    @GetMapping("/{id{")
-//    public ResponseEntity<IncidentResponse> getIncident(@PathVariable Long id) throws Exception {
-//        return incidentProcessigTimer.recordCallable(() -> {
-//            try{
-//                requestCounter.increment();
-//                IncidentResponse response = incidentService.getIncidentById(id);
-//                return ResponseEntity.ok(response);
-//            }catch (Exception e){
-//                incidentErrorCounter.increment();
-//                throw new RuntimeException(e);
-//            }
-//        });
-//    }
-
-//    @GetMapping
-//    public ResponseEntity<List<IncidentResponse>> getAllIncidents() throws Exception {
-//        return incidentProcessigTimer.recordCallable(() -> {
-//            try{
-//                requestCounter.increment();
-//                return ResponseEntity.ok(incidentService.getAllIncidents());
-//            }catch (Exception e){
-//                incidentErrorCounter.increment();
-//                throw new RuntimeException();
-//            }
-//        });
-//    }
-
-//    @PatchMapping("/{id}/status")
-//    public ResponseEntity<IncidentResponse> updateIncidentStatus(@PathVariable Long id, @RequestBody UpdateIncidentStatusRequest request) throws Exception {
-//        return incidentProcessigTimer.recordCallable(() -> {
-//            try{
-//                requestCounter.increment();
-//                IncidentResponse response = incidentService.updateIncident(id, request);
-//                incidentUpdatedCounter.increment();
-//                return ResponseEntity.ok(response);
-//            }catch (Exception e){
-//                incidentErrorCounter.increment();
-//                throw new RuntimeException(e);
-//            }
-//        });
-//    }
+    @GetMapping("/healt")
+    public ResponseEntity<Map<String,String>> health(){
+        Map<String, String> status = new HashMap<>();
+        status.put("status", "UP");
+        status.put("service", "incident-service");
+        return ResponseEntity.ok(status);
+    }
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, String>> stats(){
@@ -131,15 +73,15 @@ public class IncidentServiceController {
         metrics.put("kafka_metrics", List.of(
                 "incidents.kafka.processing.time",
                 "incidents.kafka.errors.total",
-                "incidents.kafka.updated.priority.total",
-                "incidents.kafka.updated.status.total",
-                "incidents.kafka.created.total"
+                "incidents.kafka.updated.total",
+                "incidents.kafka.created.total",
+                "incidents.kafka.found.total"
         ));
 
         metrics.put("api_metrics", List.of(
-                "incident-service.requests.total",
-                "incident-service.processing.timer",
-                "incident-service.incidents.error.total"
+                "incident-service.rest.requests.total",
+                "incident-service.rest.processing.timer",
+                "incident-service.rest.incidents.error.total"
         ));
         return ResponseEntity.ok(metrics);
     }

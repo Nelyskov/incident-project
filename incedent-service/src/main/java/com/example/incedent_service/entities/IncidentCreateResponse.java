@@ -1,0 +1,24 @@
+package com.example.incedent_service.entities;
+
+
+import com.example.common.events.Example;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class IncidentCreateResponse {
+    private Long id;
+    private String service;
+    private String info;
+    private LocalDateTime createdAt;
+    private Incident.IncidentStatus status;
+    private Incident.IncidentPriority priority;
+    private LocalDateTime updatedAt;
+}

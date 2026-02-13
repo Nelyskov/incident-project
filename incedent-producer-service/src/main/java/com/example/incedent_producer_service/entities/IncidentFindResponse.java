@@ -1,6 +1,5 @@
 package com.example.incedent_producer_service.entities;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

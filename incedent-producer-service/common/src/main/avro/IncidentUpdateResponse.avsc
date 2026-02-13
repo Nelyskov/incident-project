@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "IncidentCreatedEvent",
+  "name": "IncidentUpdateResponse",
   "namespace": "com.example.common.events",
   "fields": [
     {
@@ -12,6 +12,18 @@
       "type": "string"
     },
     {
+      "name": "info",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "IncidentStatus",
+        "symbols": ["CREATED", "PROCESSING", "COMPLETED", "CANCELLED"]
+      }
+    },
+    {
       "name": "priority",
       "type": {
         "type": "enum",
@@ -20,8 +32,8 @@
       }
     },
     {
-      "name": "info",
-      "type": "string"
+      "name": "updatedAt",
+      "type": "long"
     },
     {
       "name": "timestamp",

@@ -1,0 +1,18 @@
+
+services:
+  incident-producer-service:
+    build: .
+    container_name: incident-producer-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: app-network

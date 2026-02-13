@@ -1,24 +1,24 @@
 package com.example.incedent_producer_service.entities;
 
-import com.example.common.events.IncidentPriority;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateIncidentRequest {
-    @NotBlank
+public class IncidentUpdateRequest {
+    @NotNull
+    private Long id;
+
     private String service;
 
-    @NotBlank
     private String info;
 
-    private IncidentPriority priority;
-}
+    private Incident.IncidentStatus status;
 
+    private Incident.IncidentPriority priority;
+}
