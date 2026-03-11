@@ -1,6 +1,6 @@
 package com.example.incedent_producer_service.services;
 
-import com.example.incedent_producer_service.entities.*;
+import com.example.common.events.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -76,8 +76,8 @@ public class IncidentProducerService {
         com.example.common.events.IncidentUpdateRequest updateRequest =  com.example.common.events.IncidentUpdateRequest.newBuilder()
                 .setId(request.getId())
                 .setService(request.getService())
-                .setPriority(request.getPriority() != null ? request.getPriority().name() : null)
-                .setStatus(request.getStatus() != null ? request.getStatus().name() : null)
+                .setPriority(request.getPriority() != null ? request.getPriority() : null)
+                .setStatus(request.getStatus() != null ? request.getStatus() : null)
                 .build();
         kafkaTemplate.send(INCIDENT_UPDATE_TOPIC, uuid, updateRequest)
                 .whenComplete((result, ex) -> {
@@ -105,8 +105,8 @@ public class IncidentProducerService {
         com.example.common.events.IncidentFindRequest findRequest = com.example.common.events.IncidentFindRequest.newBuilder()
                 .setId(request.getId())
                 .setService(request.getService())
-                .setPriority(request.getPriority() != null ? request.getPriority().name() : null)
-                .setStatus(request.getStatus() != null ? request.getStatus().name() : null)
+                .setPriority((request.getPriority() != null) ? request.getPriority() : null)
+                .setStatus(request.getStatus() != null ? request.getStatus() : null)
                 .build();
 
         kafkaTemplate.send(INCIDENT_FIND_REQUEST_TOPIC, uuid, findRequest)

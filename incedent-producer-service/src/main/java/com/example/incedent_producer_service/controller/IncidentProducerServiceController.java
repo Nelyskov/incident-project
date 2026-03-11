@@ -1,7 +1,7 @@
 package com.example.incedent_producer_service.controller;
 
 
-import com.example.incedent_producer_service.entities.*;
+import com.example.common.events.*;
 import com.example.incedent_producer_service.services.IncidentProducerService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -56,7 +56,7 @@ public class IncidentProducerServiceController {
                 response.put("info", createdEvent.getInfo());
                 response.put("priority", createdEvent.getPriority());
                 response.put("status", createdEvent.getStatus());
-                response.put("time", createdEvent.getCreatedAt());
+                response.put("time", createdEvent.getTimestamp());
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
@@ -96,12 +96,12 @@ public class IncidentProducerServiceController {
     @GetMapping("/{ID}")
     public ResponseEntity<Object> getIncidentById(@PathVariable Long ID) throws Exception{
         totalRequestCounter.increment();
-        IncidentFindRequest request = IncidentFindRequest.builder()
-                .id(ID).build();
+        IncidentFindRequest request = IncidentFindRequest.newBuilder()
+                .setId(ID).build();
         try {
             IncidentFindResponse incident = service.findIncidents(request);
 
-            if (incident.getIncidentList().isEmpty()) {
+            if (incident.getIncidents().isEmpty()) {
                 return ResponseEntity.ok(incident);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
@@ -123,11 +123,11 @@ public class IncidentProducerServiceController {
             @RequestParam(required = false) String priority,
             @RequestParam(required = false) String status) {
         totalRequestCounter.increment();
-        IncidentFindRequest request = IncidentFindRequest.builder()
-                .id(id)
-                .service(service)
-                .status(status != null ? Incident.IncidentStatus.valueOf(status) : null)
-                .priority(priority != null ? Incident.IncidentPriority.valueOf(priority) : null)
+        IncidentFindRequest request = IncidentFindRequest.newBuilder()
+                .setId(id)
+                .setService(service)
+                .setStatus(status != null ? String.valueOf(IncidentStatus.valueOf(status)) : null)
+                .setPriority(priority != null ? String.valueOf(IncidentStatus.valueOf(priority)) : null)
                 .build();
         try {
             IncidentFindResponse incident = this.service.findIncidents(request);

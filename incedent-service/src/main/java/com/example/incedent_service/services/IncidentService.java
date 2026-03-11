@@ -2,7 +2,7 @@ package com.example.incedent_service.services;
 
 import com.example.common.events.IncidentPriority;
 import com.example.common.events.IncidentStatus;
-import com.example.incedent_service.entities.*;
+import com.example.common.events.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -89,11 +89,11 @@ public class IncidentService {
         try {
             log.info("Create incident: " + record);
            IncidentCreateRequest request = record.value();
-           Incident incident = Incident.builder()
-                    .service(request.getService())
-                    .info(request.getInfo())
-                    .priority(Incident.IncidentPriority.valueOf(request.getPriority().name()))
-                    .status(Incident.IncidentStatus.CREATED)
+           Incident incident = Incident.newBuilder()
+                    .setService(request.getService())
+                    .setInfo(request.getInfo())
+                    .setPriority(IncidentPriority.valueOf(request.getPriority().name()))
+                    .setStatus(IncidentStatus.CREATED)
                     .build();
 
             incidentRepository.save(incident);
@@ -108,7 +108,7 @@ public class IncidentService {
                     .setInfo(incident.getInfo())
                     .setStatus(IncidentStatus.valueOf(incident.getStatus().name()))
                     .setPriority(IncidentPriority.valueOf(incident.getPriority().name()))
-                    .setTimestamp(incident.getCreatedAt().toEpochSecond(ZoneOffset.UTC) * 1000)
+                    .setTimestamp(incident.getTimestamp() * 1000)
                     .build();
 
             kafkaTemplate.send(INCIDENT_RESPONSE_TOPIC, uuid, response)
@@ -120,7 +120,7 @@ public class IncidentService {
                             log.error("Ошибка при отправке ответа");
                         }
                     });
-            if (incident.getPriority() == Incident.IncidentPriority.HIGH) {
+            if (incident.getPriority() == IncidentPriority.HIGH) {
                 com.example.common.events.Incident highPriorityIncident = mapToAvroIncident(incident);
                 kafkaTemplate.send(INCIDENT_HIGH_PRIORITY_ALERT_TOPIC, uuid, highPriorityIncident);
                 log.info("Отправлено оповещение о HIGH PRIORITY. id: " + incident.getId());
@@ -154,12 +154,12 @@ public class IncidentService {
             }
 
             if (request.getStatus() != null) {
-                incident.setStatus(Incident.IncidentStatus.valueOf(request.getStatus().toString()));
+                incident.setStatus(IncidentStatus.valueOf(request.getStatus().toString()));
                 isUpdated = true;
             }
 
             if (request.getPriority() != null) {
-                Incident.IncidentPriority newPriority = Incident.IncidentPriority.valueOf(request.getPriority().toString());
+                IncidentPriority newPriority = IncidentPriority.valueOf(request.getPriority().toString());
                 incident.setPriority(newPriority);
                 isUpdated = true;
             }
@@ -175,7 +175,7 @@ public class IncidentService {
                         .setInfo(updatedIncident.getInfo())
                         .setStatus(com.example.common.events.IncidentStatus.valueOf(updatedIncident.getStatus().name()))
                         .setPriority(com.example.common.events.IncidentPriority.valueOf(updatedIncident.getPriority().name()))
-                        .setUpdatedAt(updatedIncident.getUpdatedAt().toEpochSecond(ZoneOffset.UTC) * 1000)
+                        .setUpdatedAt(updatedIncident.getTimestamp() * 1000)
                         .setTimestamp(Instant.now().toEpochMilli())
                         .build();
 
@@ -246,12 +246,12 @@ public class IncidentService {
 
             if (request.getPriority() != null) {
                 predicates.add(cb.equal(root.get("priority"),
-                        Incident.IncidentPriority.valueOf(request.getPriority().toString())));
+                        IncidentPriority.valueOf(request.getPriority().toString())));
             }
 
             if (request.getStatus() != null) {
                 predicates.add(cb.equal(root.get("status"),
-                        Incident.IncidentStatus.valueOf(request.getStatus().toString())));
+                        IncidentStatus.valueOf(request.getStatus().toString())));
             }
 
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
@@ -259,11 +259,11 @@ public class IncidentService {
     }
 
     ///  из Incident (сущность в entities) в avro
-    private IncidentStatus convertStatus(Incident.IncidentStatus status) {
+    private IncidentStatus convertStatus(IncidentStatus status) {
         return IncidentStatus.valueOf(status.name());
     }
 
-    private IncidentPriority convertPriority(Incident.IncidentPriority priority) {
+    private IncidentPriority convertPriority(IncidentPriority priority) {
         return IncidentPriority.valueOf(priority.name());
     }
 
@@ -274,9 +274,7 @@ public class IncidentService {
                 .setInfo(incident.getInfo())
                 .setStatus(com.example.common.events.IncidentStatus.valueOf(incident.getStatus().name()))
                 .setPriority(com.example.common.events.IncidentPriority.valueOf(incident.getPriority().name()))
-                .setTimestamp(incident.getUpdatedAt() != null ?
-                        incident.getUpdatedAt().toEpochSecond(java.time.ZoneOffset.UTC) * 1000 :
-                        incident.getCreatedAt().toEpochSecond(java.time.ZoneOffset.UTC) * 1000)
+                .setTimestamp(incident.getTimestamp() * 1000)
                 .build();
     }
 }
