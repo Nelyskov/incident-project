@@ -1,0 +1,20 @@
+plugins {
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+}
+
+description = 'Common module with Avro schemas'
+
+repositories {
+    mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
+}
+
+dependencies {
+    // Avro
+    implementation 'org.apache.avro:avro:1.11.3'
+    implementation 'io.confluent:kafka-avro-serializer:7.4.1'
+}
+// Генерация Avro классов перед компиляцией
+tasks.named('compileJava') {
+    dependsOn('generateAvroJava')
+}

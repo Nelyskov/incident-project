@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "Example",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "info",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    }
+  ]
+}

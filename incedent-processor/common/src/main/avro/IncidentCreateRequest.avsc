@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "IncidentCreateRequest",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "priority",
+      "type": {
+        "type": "enum",
+        "name": "IncidentPriority",
+        "symbols": ["HIGH", "MEDIUM", "LOW"]
+      }
+    },
+    {
+      "name": "info",
+      "type": "string"
+    }
+  ]
+}
