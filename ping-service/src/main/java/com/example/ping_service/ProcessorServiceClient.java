@@ -1,4 +1,19 @@
 package com.example.ping_service;
 
-public class ProcessorServiceClient {
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Map;
+
+@FeignClient(name = "processor-service", url = "${services.processor.url}")
+public interface ProcessorServiceClient {
+
+    @GetMapping("${services.processor.healthEndpoint}")
+    String pingService();
+
+    @GetMapping("/api/status")
+    String getServiceStatus();
+
+    @GetMapping("/api/metrics")
+    Map<String, Object> getMetrics();
 }
