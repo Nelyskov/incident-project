@@ -1,3 +1,42 @@
 spring:
   application:
     name: incedent-processor
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+server:
+  port: 8086
+
+
+  kafka:
+    bootstrap-servers: kafka:29092
+    schema-registry-url: http://schema-registry:8081
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema.registry.url: http://schema-registry:8081
+      acks: all
+      retries: 3
+
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: http://schema-registry:8081
+        specific.avro.reader: true
+      group-id: incident-producer-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
