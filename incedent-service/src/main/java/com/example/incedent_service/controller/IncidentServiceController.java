@@ -42,7 +42,7 @@ public class IncidentServiceController {
                 .register(meterRegistry);
     }
 
-    @GetMapping("/healt")
+    @GetMapping("/health")
     public ResponseEntity<Map<String,String>> health(){
         Map<String, String> status = new HashMap<>();
         status.put("status", "UP");
