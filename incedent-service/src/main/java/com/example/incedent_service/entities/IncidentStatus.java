@@ -1,4 +1,8 @@
-package com.example.incedent_service.repositories;
+package com.example.incedent_service.entities;
 
-public class IncidentStatus {
+public enum IncidentStatus {
+    CREATED,
+    PROCESSING,
+    COMPLETED,
+    CANCELLED
 }

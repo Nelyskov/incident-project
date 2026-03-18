@@ -1,13 +1,14 @@
 services:
-  incident-service:
+  incedent-service:
     build: .
-    container_name: incident-service
+    container_name: incedent-service
     ports:
       - "8079:8079"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    restart: on-failure
     networks:
       - app-network  # ДОЛЖНА быть external сеть из infra
 

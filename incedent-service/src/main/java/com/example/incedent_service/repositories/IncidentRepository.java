@@ -1,9 +1,11 @@
 package com.example.incedent_service.repositories;
 
+import com.example.incedent_service.entities.Incident;
+import com.example.incedent_service.entities.IncidentStatus;
+import com.example.incedent_service.entities.IncidentPriority;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-import com.example.common.events.*;
 
 import java.util.List;
 import java.util.Optional;

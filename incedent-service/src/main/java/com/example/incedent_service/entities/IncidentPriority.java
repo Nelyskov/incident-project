@@ -1,4 +1,7 @@
 package com.example.incedent_service.entities;
 
-public class IncidentPriority {
+public enum IncidentPriority {
+    HIGH,
+    MEDIUM,
+    LOW
 }

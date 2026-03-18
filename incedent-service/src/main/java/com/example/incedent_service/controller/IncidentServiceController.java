@@ -21,22 +21,22 @@ public class IncidentServiceController {
 
     private final Counter requestCounter;
     private final Counter incidentErrorCounter;
-    private final Timer incidentProcessigTimer;
+    private final Timer incidentProcessingTimer;
 
-    public IncidentServiceController(IncidentService incidentService, MeterRegistry meterRegistry1, MeterRegistry meterRegistry){
+    public IncidentServiceController(IncidentService incidentService, MeterRegistry meterRegistry){
         this.incidentService = incidentService;
-        this.meterRegistry = meterRegistry1;
-        this.requestCounter = Counter.builder("incident-service.requests.total")
+        this.meterRegistry = meterRegistry;
+        this.requestCounter = Counter.builder("incident-service.rest.requests.total")
                 .description("Общее количество REST запросов")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
 
 
-        incidentProcessigTimer = Timer.builder("incident-service.processing.timer")
+        this.incidentProcessingTimer = Timer.builder("incident-service.rest.processing.timer")
                 .description("Время обработки REST запросов")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
-        incidentErrorCounter = Counter.builder("incident-service.incidents.error.total")
+        this.incidentErrorCounter = Counter.builder("incident-service.rest.incidents.error.total")
                 .description("Общее количество ошибок в REST запросах")
                 .tag("application", "incident-service")
                 .register(meterRegistry);
@@ -85,6 +85,4 @@ public class IncidentServiceController {
         ));
         return ResponseEntity.ok(metrics);
     }
-
-
 }

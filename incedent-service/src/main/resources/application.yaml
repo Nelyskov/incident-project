@@ -1,9 +1,14 @@
 spring:
   application:
     name: incedent-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
 
   kafka:
-    bootstrap-servers: kafka:2909
+    bootstrap-servers: kafka:29092
     schema-registry-url: http://schema-registry:8081
 
     producer:
@@ -50,9 +55,9 @@ management:
   endpoint:
     prometheus:
       enabled: true
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
     distribution:
       percentiles-histogram:
