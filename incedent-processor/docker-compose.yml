@@ -1,0 +1,17 @@
+services:
+  incedent-processor:
+    build: .
+    container_name: incident-processor-service
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    networks:
+      - app-network  # ДОЛЖНА быть external сеть из infra
+
+networks:
+  app-network:
+    external: true
+    name: app-network  # Уточняем полное имя сети

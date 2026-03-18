@@ -1,11 +1,9 @@
 package com.example.incedent_processor.controller;
 
-import com.example.common.events.*;
 import com.example.incedent_processor.services.IncidentProcessorService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,8 +61,9 @@ public class IncidentProcessorController {
         metrics.put("api_metrics", List.of(
                 "incident-processor.requests.total",
                 "incident-processor.processing.timer",
-                "incident-processor.error.total"
+                "incident-processor.errors.total"
         ));
+
         return ResponseEntity.ok(metrics);
     }
 
