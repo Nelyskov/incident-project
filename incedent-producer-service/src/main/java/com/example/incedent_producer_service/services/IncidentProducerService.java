@@ -3,18 +3,23 @@ package com.example.incedent_producer_service.services;
 import com.example.common.events.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class IncidentProducerService {
 
     private  final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public IncidentProducerService(KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     private final ConcurrentHashMap<String, CompletableFuture<IncidentCreateResponse>> pendingCreateRequests = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, CompletableFuture<IncidentFindResponse>> pendingFindRequests = new ConcurrentHashMap<>();
@@ -28,7 +33,6 @@ public class IncidentProducerService {
     private static final String INCIDENT_HIGH_PRIORITY_ALERT = "high-priority-alert";
 
     private static final int REQUEST_TIMEOUT_SECONDS = 30;
-
 
     public IncidentCreateResponse createIncident(IncidentCreateRequest request)
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -45,25 +49,20 @@ public class IncidentProducerService {
 
         kafkaTemplate.send(INCIDENT_CREATE_TOPIC, uuid, createRequest)
                 .whenComplete((result, ex) -> {
-                    if(ex == null)
-                    {
-                        log.info("Событие отправлено");
-                    }
-                    else {
-                        log.error("Ошибка при отправке");
+                    if (ex == null) {
+                        log.info("CREATE событие отправлено. uuid: {}", uuid);
+                    } else {
+                        log.error("Ошибка при отправке CREATE. uuid: {}", uuid, ex);
                         future.completeExceptionally(ex);
                         pendingCreateRequests.remove(uuid);
                     }
                 });
 
-        IncidentCreateResponse response= future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        if (response.getPriority().toString() == "HIGH") {
-            kafkaTemplate.send(INCIDENT_HIGH_PRIORITY_ALERT, uuid, response);
-            log.info("Высокий приоритет");
-
+        try {
+            return future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } finally {
+            pendingCreateRequests.remove(uuid);
         }
-        pendingCreateRequests.remove(uuid);
-        return response;
     }
 
     public IncidentUpdateResponse updateIncident(IncidentUpdateRequest request)
@@ -83,16 +82,19 @@ public class IncidentProducerService {
                 .whenComplete((result, ex) -> {
                     if(ex == null)
                     {
-                        log.info("Событие отправлено");
+                        log.info(" UPDATE Событие отправлено. uuid: {}", uuid);
                     }
                     else {
-                        log.error("Ошибка при отправке");
+                        log.error("Ошибка при отправке UPDATE. uuid: {}", uuid, ex);
                         future.completeExceptionally(ex);
                         pendingCreateRequests.remove(uuid);
                     }
                 });
-        IncidentUpdateResponse response = future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        return response;
+        try {
+            return future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } finally {
+            pendingUpdateRequests.remove(uuid);
+        }
     }
 
     public IncidentFindResponse findIncidents(IncidentFindRequest request)
@@ -112,29 +114,43 @@ public class IncidentProducerService {
         kafkaTemplate.send(INCIDENT_FIND_REQUEST_TOPIC, uuid, findRequest)
                 .whenComplete((result, ex) -> {
                     if(ex == null){
-                        log.info("Событие отправлено");
+                        log.info("Событие отправлено FIND uuid: {}", uuid);
                     }
                     else {
-                        log.error("Ошибка при отправке");
+                        log.error("Ошибка при отправке FIND uuid: {}", uuid, ex);
                         future.completeExceptionally(ex);
                         pendingFindRequests.remove(uuid);
                     }
                 });
-        IncidentFindResponse response = future.get(30, TimeUnit.SECONDS);
-        log.info("Событие получено");
-        pendingFindRequests.remove(uuid);
-        return response;
+        try {
+            IncidentFindResponse response = future.get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            log.info("FIND событие получено. uuid: {}", uuid);
+            return response;
+        } finally {
+            pendingFindRequests.remove(uuid);
+        }
+
     }
 
-    @KafkaListener(topics = INCIDENT_FIND_RESPONSE_TOPIC, groupId = "incident-producer-service-group")
-    public void findIncidentResponse(com.example.common.events.IncidentFindResponse response){
-        String uuid = String.valueOf(response.hashCode());
-        CompletableFuture<com.example.common.events.IncidentFindResponse> future = new CompletableFuture<>();
-        if(future != null){
-            future.complete(response);
-            pendingFindRequests.remove(uuid);
-            log.info("Получен ответ поиска");
+    @KafkaListener(
+            topics = INCIDENT_FIND_RESPONSE_TOPIC,
+            groupId = "incident-producer-service-group",
+            containerFactory = "incidentProducerServiceKafkaListener"
+    )
+    public void findIncidentResponse(
+            ConsumerRecord<String, IncidentFindResponse> record, // FIX: ConsumerRecord
+            Acknowledgment ack) {
+
+        String uuid = record.key();
+        CompletableFuture<IncidentFindResponse> future = pendingFindRequests.get(uuid);
+        if (future != null) {
+            future.complete(record.value());
+            log.info("FIND ответ получен. uuid: {}", uuid);
+        } else {
+            log.warn("Нет ожидающего FIND future для uuid: {}", uuid);
         }
+
+        ack.acknowledge();
     }
 
     @KafkaListener(topics = INCIDENT_RESPONSE_TOPIC, groupId = "incident-producer-service-group")
@@ -146,6 +162,41 @@ public class IncidentProducerService {
             pendingCreateRequests.remove(uuid);
             log.info("Получен ответ на создание инцидента");
         }
+    }
+
+    @KafkaListener(
+            topics = INCIDENT_RESPONSE_TOPIC,
+            groupId = "incident-producer-service-group",
+            containerFactory = "incidentProducerServiceKafkaListener"
+    )
+    public void handleIncidentResponse(
+            ConsumerRecord<String, Object> record, // FIX: ConsumerRecord для доступа к uuid-ключу
+            Acknowledgment ack) {
+
+        String uuid = record.key();
+        Object value = record.value();
+
+        if (value instanceof IncidentCreateResponse response) {
+            CompletableFuture<IncidentCreateResponse> future = pendingCreateRequests.get(uuid);
+            if (future != null) {
+                future.complete(response);
+                log.info("CREATE ответ получен. uuid: {}", uuid);
+            } else {
+                log.warn("Нет ожидающего CREATE future для uuid: {}", uuid);
+            }
+
+        } else if (value instanceof IncidentUpdateResponse response) {
+            CompletableFuture<IncidentUpdateResponse> future = pendingUpdateRequests.get(uuid);
+            if (future != null) {
+                future.complete(response);
+                log.info("UPDATE ответ получен. uuid: {}", uuid);
+            } else {
+                log.warn("Нет ожидающего UPDATE future для uuid: {}", uuid);
+            }
+        } else {
+            log.warn("Неизвестный тип ответа в топике {}. uuid: {}", INCIDENT_RESPONSE_TOPIC, uuid);
+        }
+        ack.acknowledge();
     }
 
 }

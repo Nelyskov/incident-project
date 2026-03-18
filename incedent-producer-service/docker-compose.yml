@@ -1,8 +1,8 @@
 
 services:
-  incident-producer-service:
+  incedent-producer-service:
     build: .
-    container_name: incident-producer-service
+    container_name: incedent-producer-service
     ports:
       - "8082:8082"
     environment:
