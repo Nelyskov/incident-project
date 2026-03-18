@@ -13,7 +13,6 @@ public class ServiceDetails {
     private String name;
     private String url;
     private String healthEndpoint;
-    private String apiEndpoint;
     private int timeout;
     private int retryCount;
     private boolean status;

@@ -8,7 +8,7 @@ import java.util.Map;
 @FeignClient(name = "producer-service", url = "${services.producerService.url}")
 public interface ProducerServiceClient {
 
-    @GetMapping("${services.producerService.healthEndpoint}")
+    @GetMapping("/health")
     String pingService();
 
     @GetMapping("/api/status")

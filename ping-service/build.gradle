@@ -6,7 +6,6 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'openfeign'
 
 java {
 	toolchain {
@@ -23,20 +22,18 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	testImplementation 'org.springframework.boot:spring-boot-starter-mongodb-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// FIX: убраны mongodb и тесты — ping-service не использует БД
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }

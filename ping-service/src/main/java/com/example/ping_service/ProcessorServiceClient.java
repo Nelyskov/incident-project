@@ -8,7 +8,7 @@ import java.util.Map;
 @FeignClient(name = "processor-service", url = "${services.processor.url}")
 public interface ProcessorServiceClient {
 
-    @GetMapping("${services.processor.healthEndpoint}")
+    @GetMapping("/actuator/health")
     String pingService();
 
     @GetMapping("/api/status")
