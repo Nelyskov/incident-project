@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "Alert",
+  "namespace": "com.example.common.events",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "service",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "IncidentStatus",
+        "symbols": ["CREATED", "PROCESSING", "COMPLETED", "CANCELLED"]
+      }
+    },
+    {
+      "name": "info",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name" : "responsibleGroup",
+      "type" : "string"
+    }
+
+  ]
+}
