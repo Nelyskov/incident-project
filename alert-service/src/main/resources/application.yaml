@@ -1,3 +1,43 @@
 spring:
   application:
     name: alert-service
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nlyskv12@gmail.com
+    password: amca szeh fgeq wbzs
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    schema-registry-url: ${SPRING_KAFKA_SCHEMA_REGISTRY_URL:http://schema-registry:8081}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: ${SPRING_KAFKA_SCHEMA_REGISTRY_URL:http://schema-registry:8081}
+        specific.avro.reader: true
+      group-id: alert-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+  server:
+    port: 8085
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,prometheus,metrics
+    endpoint:
+      prometheus:
+        enabled: true
+    metrics:
+      tags:
+        application: ${spring.application.name}

@@ -1,0 +1,20 @@
+services:
+  alert-service:
+    build: .
+    container_name: alert-service
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      SPRING_MAIL_USERNAME: nlyskv12@gmail.com
+      SPRING_MAIL_PASSWORD: amca szeh fgeq wbzs
+    restart: on-failure
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: app-network

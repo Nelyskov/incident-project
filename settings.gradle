@@ -1,0 +1,8 @@
+rootProject.name = 'incident-project'
+
+include 'common'
+include 'incedent-service'
+include 'incedent-processor'
+include 'incedent-producer-service'
+include 'alert-service'
+include 'ping-service'

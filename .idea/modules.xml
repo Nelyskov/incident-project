@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/incedent-processor.main.iml" filepath="$PROJECT_DIR$/.idea/modules/incedent-processor.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/incedent-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/incedent-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1657661337/incident-project.alert-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-1657661337/incident-project.alert-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1562421520/incident-project.incedent-processor.main.iml" filepath="$PROJECT_DIR$/.idea/modules/1562421520/incident-project.incedent-processor.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1237319364/incident-project.incedent-producer-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-1237319364/incident-project.incedent-producer-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1169042099/incident-project.incedent-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/1169042099/incident-project.incedent-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1623091159/incident-project.ping-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/1623091159/incident-project.ping-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ping-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ping-service.main.iml" />
+    </modules>
+  </component>
+</project>
