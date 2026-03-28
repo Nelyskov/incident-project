@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,13 +95,28 @@ public class IncidentProducerServiceController {
     @GetMapping("/{ID}")
     public ResponseEntity<Object> getIncidentById(@PathVariable Long ID) throws Exception{
         totalRequestCounter.increment();
-        IncidentFindRequest request = IncidentFindRequest.newBuilder().setId(ID).build();
+        IncidentFindRequest request = IncidentFindRequest.newBuilder()
+                .setId(ID)
+                .setService(null)
+                .setPriority(null)
+                .setStatus(null)
+                .build();
 
         try {
-            IncidentFindResponse incident = service.findIncidents(request);
+            IncidentFindResponse response = service.findIncidents(request);
 
-            if (!incident.getIncidents().isEmpty()) {
-                return ResponseEntity.ok(incident);
+            if (!response.getIncidents().isEmpty()) {
+                var incident = response.getIncidents().get(0);
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("id", incident.getId());
+                result.put("service", incident.getService().toString());
+                result.put("info", incident.getInfo().toString());
+                result.put("status", incident.getStatus().toString());
+                result.put("priority", incident.getPriority().toString());
+                result.put("timestamp", incident.getTimestamp());
+
+                return ResponseEntity.ok(result);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Инцидент не найден");
@@ -122,18 +138,34 @@ public class IncidentProducerServiceController {
         totalRequestCounter.increment();
         IncidentFindRequest.Builder builder = IncidentFindRequest.newBuilder()
                 .setId(id)
-                .setService(service);
+                .setService(service)
+                .setPriority(null)
+                .setStatus(null);
 
-            if (priority != null) {
-                builder.setPriority(String.valueOf(IncidentPriority.valueOf(priority)));
-            }
-            if (status != null) {
-                builder.setStatus(String.valueOf(IncidentStatus.valueOf(status)));
-            }
+        if (priority != null) {
+            builder.setPriority(IncidentPriority.valueOf(priority));
+        }
+        if (status != null) {
+            builder.setStatus(IncidentStatus.valueOf(status));
+        }
 
         try {
             IncidentFindResponse response = this.service.findIncidents(builder.build());
-            return ResponseEntity.ok(response);
+
+            List<Map<String, Object>> incidents = response.getIncidents().stream()
+                    .map(incident -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", incident.getId());
+                        map.put("service", incident.getService().toString());
+                        map.put("info", incident.getInfo().toString());
+                        map.put("status", incident.getStatus().toString());
+                        map.put("priority", incident.getPriority().toString());
+                        map.put("timestamp", incident.getTimestamp());
+                        return map;
+                    })
+                    .toList();
+
+            return ResponseEntity.ok(Map.of("incidents", incidents));
         } catch (Exception e) {
             totalErrorCounter.increment();
             return ResponseEntity.internalServerError().body(e.getMessage());

@@ -14,10 +14,10 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 8871264921293076544L;
+  private static final long serialVersionUID = -4756785815299927967L;
 
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"IncidentFindRequest\",\"namespace\":\"com.example.common.events\",\"fields\":[{\"name\":\"id\",\"type\":[\"null\",\"long\"]},{\"name\":\"service\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}]},{\"name\":\"priority\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}]},{\"name\":\"status\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}]}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"IncidentFindRequest\",\"namespace\":\"com.example.common.events\",\"fields\":[{\"name\":\"id\",\"type\":[\"null\",\"long\"],\"default\":null},{\"name\":\"service\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"default\":null},{\"name\":\"priority\",\"type\":[\"null\",{\"type\":\"enum\",\"name\":\"IncidentPriority\",\"symbols\":[\"HIGH\",\"MEDIUM\",\"LOW\"]}],\"default\":null},{\"name\":\"status\",\"type\":[\"null\",{\"type\":\"enum\",\"name\":\"IncidentStatus\",\"symbols\":[\"CREATED\",\"PROCESSING\",\"COMPLETED\",\"CANCELLED\"]}],\"default\":null}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static final SpecificData MODEL$ = new SpecificData();
@@ -75,8 +75,8 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
 
   private java.lang.Long id;
   private java.lang.String service;
-  private java.lang.String priority;
-  private java.lang.String status;
+  private com.example.common.events.IncidentPriority priority;
+  private com.example.common.events.IncidentStatus status;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -92,7 +92,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
    * @param priority The new value for priority
    * @param status The new value for status
    */
-  public IncidentFindRequest(java.lang.Long id, java.lang.String service, java.lang.String priority, java.lang.String status) {
+  public IncidentFindRequest(java.lang.Long id, java.lang.String service, com.example.common.events.IncidentPriority priority, com.example.common.events.IncidentStatus status) {
     this.id = id;
     this.service = service;
     this.priority = priority;
@@ -124,8 +124,8 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
     switch (field$) {
     case 0: id = (java.lang.Long)value$; break;
     case 1: service = value$ != null ? value$.toString() : null; break;
-    case 2: priority = value$ != null ? value$.toString() : null; break;
-    case 3: status = value$ != null ? value$.toString() : null; break;
+    case 2: priority = (com.example.common.events.IncidentPriority)value$; break;
+    case 3: status = (com.example.common.events.IncidentStatus)value$; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -168,7 +168,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
    * Gets the value of the 'priority' field.
    * @return The value of the 'priority' field.
    */
-  public java.lang.String getPriority() {
+  public com.example.common.events.IncidentPriority getPriority() {
     return priority;
   }
 
@@ -177,7 +177,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
    * Sets the value of the 'priority' field.
    * @param value the value to set.
    */
-  public void setPriority(java.lang.String value) {
+  public void setPriority(com.example.common.events.IncidentPriority value) {
     this.priority = value;
   }
 
@@ -185,7 +185,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
    * Gets the value of the 'status' field.
    * @return The value of the 'status' field.
    */
-  public java.lang.String getStatus() {
+  public com.example.common.events.IncidentStatus getStatus() {
     return status;
   }
 
@@ -194,7 +194,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
    * Sets the value of the 'status' field.
    * @param value the value to set.
    */
-  public void setStatus(java.lang.String value) {
+  public void setStatus(com.example.common.events.IncidentStatus value) {
     this.status = value;
   }
 
@@ -241,8 +241,8 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
 
     private java.lang.Long id;
     private java.lang.String service;
-    private java.lang.String priority;
-    private java.lang.String status;
+    private com.example.common.events.IncidentPriority priority;
+    private com.example.common.events.IncidentStatus status;
 
     /** Creates a new Builder */
     private Builder() {
@@ -381,7 +381,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       * Gets the value of the 'priority' field.
       * @return The value.
       */
-    public java.lang.String getPriority() {
+    public com.example.common.events.IncidentPriority getPriority() {
       return priority;
     }
 
@@ -391,7 +391,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'priority'.
       * @return This builder.
       */
-    public com.example.common.events.IncidentFindRequest.Builder setPriority(java.lang.String value) {
+    public com.example.common.events.IncidentFindRequest.Builder setPriority(com.example.common.events.IncidentPriority value) {
       validate(fields()[2], value);
       this.priority = value;
       fieldSetFlags()[2] = true;
@@ -421,7 +421,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       * Gets the value of the 'status' field.
       * @return The value.
       */
-    public java.lang.String getStatus() {
+    public com.example.common.events.IncidentStatus getStatus() {
       return status;
     }
 
@@ -431,7 +431,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'status'.
       * @return This builder.
       */
-    public com.example.common.events.IncidentFindRequest.Builder setStatus(java.lang.String value) {
+    public com.example.common.events.IncidentFindRequest.Builder setStatus(com.example.common.events.IncidentStatus value) {
       validate(fields()[3], value);
       this.status = value;
       fieldSetFlags()[3] = true;
@@ -464,8 +464,8 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
         IncidentFindRequest record = new IncidentFindRequest();
         record.id = fieldSetFlags()[0] ? this.id : (java.lang.Long) defaultValue(fields()[0]);
         record.service = fieldSetFlags()[1] ? this.service : (java.lang.String) defaultValue(fields()[1]);
-        record.priority = fieldSetFlags()[2] ? this.priority : (java.lang.String) defaultValue(fields()[2]);
-        record.status = fieldSetFlags()[3] ? this.status : (java.lang.String) defaultValue(fields()[3]);
+        record.priority = fieldSetFlags()[2] ? this.priority : (com.example.common.events.IncidentPriority) defaultValue(fields()[2]);
+        record.status = fieldSetFlags()[3] ? this.status : (com.example.common.events.IncidentStatus) defaultValue(fields()[3]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -519,7 +519,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       out.writeNull();
     } else {
       out.writeIndex(1);
-      out.writeString(this.priority);
+      out.writeEnum(this.priority.ordinal());
     }
 
     if (this.status == null) {
@@ -527,7 +527,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
       out.writeNull();
     } else {
       out.writeIndex(1);
-      out.writeString(this.status);
+      out.writeEnum(this.status.ordinal());
     }
 
   }
@@ -555,14 +555,14 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
         in.readNull();
         this.priority = null;
       } else {
-        this.priority = in.readString();
+        this.priority = com.example.common.events.IncidentPriority.values()[in.readEnum()];
       }
 
       if (in.readIndex() != 1) {
         in.readNull();
         this.status = null;
       } else {
-        this.status = in.readString();
+        this.status = com.example.common.events.IncidentStatus.values()[in.readEnum()];
       }
 
     } else {
@@ -591,7 +591,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
             in.readNull();
             this.priority = null;
           } else {
-            this.priority = in.readString();
+            this.priority = com.example.common.events.IncidentPriority.values()[in.readEnum()];
           }
           break;
 
@@ -600,7 +600,7 @@ public class IncidentFindRequest extends org.apache.avro.specific.SpecificRecord
             in.readNull();
             this.status = null;
           } else {
-            this.status = in.readString();
+            this.status = com.example.common.events.IncidentStatus.values()[in.readEnum()];
           }
           break;
 

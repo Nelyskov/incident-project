@@ -11,9 +11,6 @@ public interface ProducerServiceClient {
     @GetMapping("/health")
     String pingService();
 
-    @GetMapping("/api/status")
-    String getServiceStatus();
-
-    @GetMapping("/api/metrics")
+    @GetMapping("/metrics")
     Map<String, Object> getMetrics();
 }

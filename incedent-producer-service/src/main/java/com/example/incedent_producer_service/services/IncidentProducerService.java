@@ -25,12 +25,13 @@ public class IncidentProducerService {
     private final ConcurrentHashMap<String, CompletableFuture<IncidentFindResponse>> pendingFindRequests = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, CompletableFuture<IncidentUpdateResponse>> pendingUpdateRequests = new ConcurrentHashMap<>();
 
-    private static final String INCIDENT_CREATE_TOPIC = "incident-create";
-    private static final String INCIDENT_RESPONSE_TOPIC = "incident-response";
-    private static final String INCIDENT_UPDATE_TOPIC = "incident-update";
-    private static final String INCIDENT_FIND_REQUEST_TOPIC = "incident-find-request";
+    private static final String INCIDENT_CREATE_TOPIC        = "incident-create";
+    private static final String INCIDENT_UPDATE_TOPIC        = "incident-update";
+    private static final String INCIDENT_FIND_REQUEST_TOPIC  = "incident-find-request";
     private static final String INCIDENT_FIND_RESPONSE_TOPIC = "incident-find-response";
-    private static final String INCIDENT_HIGH_PRIORITY_ALERT = "high-priority-alert";
+    private static final String INCIDENT_CREATE_RESPONSE_TOPIC = "incident-create-response";
+    private static final String INCIDENT_UPDATE_RESPONSE_TOPIC = "incident-update-response";
+
 
     private static final int REQUEST_TIMEOUT_SECONDS = 30;
 
@@ -78,7 +79,7 @@ public class IncidentProducerService {
                 .setPriority(request.getPriority() != null ? request.getPriority() : null)
                 .setStatus(request.getStatus() != null ? request.getStatus() : null)
                 .build();
-        kafkaTemplate.send(INCIDENT_UPDATE_TOPIC, uuid, updateRequest)
+        kafkaTemplate.send(INCIDENT_UPDATE_TOPIC , uuid, updateRequest)
                 .whenComplete((result, ex) -> {
                     if(ex == null)
                     {
@@ -133,14 +134,51 @@ public class IncidentProducerService {
     }
 
     @KafkaListener(
+            topics = INCIDENT_CREATE_RESPONSE_TOPIC,
+            groupId = "incident-producer-service-group",
+            containerFactory = "incidentProducerServiceKafkaListener"
+    )
+    public void handleCreateResponse(
+            ConsumerRecord<String, IncidentCreateResponse> record,
+            Acknowledgment ack) {
+        String uuid = record.key();
+        CompletableFuture<IncidentCreateResponse> future = pendingCreateRequests.get(uuid);
+        if (future != null) {
+            future.complete(record.value());
+            log.info("CREATE ответ получен. uuid: {}", uuid);
+        } else {
+            log.warn("Нет ожидающего CREATE future для uuid: {}", uuid);
+        }
+        ack.acknowledge();
+    }
+
+    @KafkaListener(
+            topics = INCIDENT_UPDATE_RESPONSE_TOPIC,
+            groupId = "incident-producer-service-group",
+            containerFactory = "incidentProducerServiceKafkaListener"
+    )
+    public void handleUpdateResponse(
+            ConsumerRecord<String, IncidentUpdateResponse> record,
+            Acknowledgment ack) {
+        String uuid = record.key();
+        CompletableFuture<IncidentUpdateResponse> future = pendingUpdateRequests.get(uuid);
+        if (future != null) {
+            future.complete(record.value());
+            log.info("UPDATE ответ получен. uuid: {}", uuid);
+        } else {
+            log.warn("Нет ожидающего UPDATE future для uuid: {}", uuid);
+        }
+        ack.acknowledge();
+    }
+
+    @KafkaListener(
             topics = INCIDENT_FIND_RESPONSE_TOPIC,
             groupId = "incident-producer-service-group",
             containerFactory = "incidentProducerServiceKafkaListener"
     )
     public void findIncidentResponse(
-            ConsumerRecord<String, IncidentFindResponse> record, // FIX: ConsumerRecord
+            ConsumerRecord<String, IncidentFindResponse> record,
             Acknowledgment ack) {
-
         String uuid = record.key();
         CompletableFuture<IncidentFindResponse> future = pendingFindRequests.get(uuid);
         if (future != null) {
@@ -148,53 +186,6 @@ public class IncidentProducerService {
             log.info("FIND ответ получен. uuid: {}", uuid);
         } else {
             log.warn("Нет ожидающего FIND future для uuid: {}", uuid);
-        }
-
-        ack.acknowledge();
-    }
-
-    @KafkaListener(topics = INCIDENT_RESPONSE_TOPIC, groupId = "incident-producer-service-group")
-    public void createIncidentResponse(IncidentCreateResponse response) {
-        String uuid = String.valueOf(response.getId());
-        CompletableFuture<IncidentCreateResponse> future = pendingCreateRequests.get(uuid);
-        if (future != null) {
-            future.complete(response);
-            pendingCreateRequests.remove(uuid);
-            log.info("Получен ответ на создание инцидента");
-        }
-    }
-
-    @KafkaListener(
-            topics = INCIDENT_RESPONSE_TOPIC,
-            groupId = "incident-producer-service-group",
-            containerFactory = "incidentProducerServiceKafkaListener"
-    )
-    public void handleIncidentResponse(
-            ConsumerRecord<String, Object> record, // FIX: ConsumerRecord для доступа к uuid-ключу
-            Acknowledgment ack) {
-
-        String uuid = record.key();
-        Object value = record.value();
-
-        if (value instanceof IncidentCreateResponse response) {
-            CompletableFuture<IncidentCreateResponse> future = pendingCreateRequests.get(uuid);
-            if (future != null) {
-                future.complete(response);
-                log.info("CREATE ответ получен. uuid: {}", uuid);
-            } else {
-                log.warn("Нет ожидающего CREATE future для uuid: {}", uuid);
-            }
-
-        } else if (value instanceof IncidentUpdateResponse response) {
-            CompletableFuture<IncidentUpdateResponse> future = pendingUpdateRequests.get(uuid);
-            if (future != null) {
-                future.complete(response);
-                log.info("UPDATE ответ получен. uuid: {}", uuid);
-            } else {
-                log.warn("Нет ожидающего UPDATE future для uuid: {}", uuid);
-            }
-        } else {
-            log.warn("Неизвестный тип ответа в топике {}. uuid: {}", INCIDENT_RESPONSE_TOPIC, uuid);
         }
         ack.acknowledge();
     }

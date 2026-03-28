@@ -1,28 +1,31 @@
-# Конфигурация Prometheus
-# Этот файл определяет, какие метрики собирать и откуда
-
 global:
-  # Как часто собирать метрики
   scrape_interval: 15s
-  # Таймаут для сбора метрик
   scrape_timeout: 10s
-  # Как часто вычислять правила (если есть)
   evaluation_interval: 15s
 
-# Конфигурация для сбора метрик
 scrape_configs:
-  # Имя job'а для идентификации источника метрик
-  - job_name: 'incedent-project-metrics'
-    # URL для сбора метрик (endpoint /actuator/prometheus)
+  - job_name: 'incedent-project-local'
+    metrics_path: /actuator/prometheus
     static_configs:
       - targets:
-          - 'host.docker.internal:8079'   # incident-service
-          - 'host.docker.internal:8082'   # incident-producer-service
-          - 'host.docker.internal:8086'   # incident-processor
-          - 'host.docker.internal:9091'   # ping-service
-#          - 'host.docker.internal:8081'   # kafka
-#          - 'host.docker.internal:3000'   # grafana
-#          - 'host.docker.internal:5432'   # postgresql
+          - 'host.docker.internal:8079'
+          - 'host.docker.internal:8082'
+          - 'host.docker.internal:8086'
+          - 'host.docker.internal:9091'
+          - 'host.docker.internal:8085'
         labels:
           application: 'incident-project'
           environment: 'development'
+
+  - job_name: 'incedent-project-docker'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - 'incedent-service:8079'
+          - 'incedent-producer-service:8082'
+          - 'incident-processor-service:8086'
+          - 'ping-service:9091'
+          - 'alert-service:8085'
+        labels:
+          application: 'incident-project'
+          environment: 'docker'

@@ -8,7 +8,9 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-    restart: on-failure
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 8520
     networks:
       - app-network  # ДОЛЖНА быть external сеть из infra
 

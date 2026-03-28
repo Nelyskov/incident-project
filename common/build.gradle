@@ -1,8 +1,16 @@
 plugins {
+    id 'java'  // FIX: добавлен java плагин — без него toolchain не работает
     id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
 }
 
 description = 'Common module with Avro schemas'
+
+// FIX: java блок перенесён после plugins
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 repositories {
     mavenCentral()

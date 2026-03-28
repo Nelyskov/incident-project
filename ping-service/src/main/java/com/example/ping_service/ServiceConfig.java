@@ -12,6 +12,7 @@ public class ServiceConfig {
     private Service service;
     private Processor processor;
     private ProducerService producerService;
+    private AlertService alertService;
 
     @Data
     public static class Service {
@@ -27,6 +28,12 @@ public class ServiceConfig {
 
     @Data
     public static class ProducerService {
+        private String url;
+        private String healthEndpoint;
+    }
+
+    @Data
+    public static class AlertService {
         private String url;
         private String healthEndpoint;
     }

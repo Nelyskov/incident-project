@@ -1,18 +1,17 @@
 package com.example.incedent_service.services;
 
+
 import com.example.common.events.IncidentCreateRequest;
-import com.example.common.events.IncidentUpdateRequest;
-import com.example.common.events.IncidentFindRequest;
 import com.example.common.events.IncidentCreateResponse;
+import com.example.common.events.IncidentUpdateRequest;
 import com.example.common.events.IncidentUpdateResponse;
+import com.example.common.events.IncidentFindRequest;
 import com.example.common.events.IncidentFindResponse;
 
 import com.example.incedent_service.entities.Incident;
 import com.example.incedent_service.entities.IncidentStatus;
 import com.example.incedent_service.entities.IncidentPriority;
-
 import com.example.incedent_service.repositories.IncidentRepository;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -26,8 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -43,7 +42,8 @@ public class IncidentService {
     private final Timer kafkaProcessingTimer;
 
     private static final String INCIDENT_CREATE_TOPIC = "incident-create";
-    private static final String INCIDENT_RESPONSE_TOPIC = "incident-response";
+    private static final String INCIDENT_CREATE_RESPONSE_TOPIC = "incident-create-response"; // FIX
+    private static final String INCIDENT_UPDATE_RESPONSE_TOPIC = "incident-update-response"; // FIX
     private static final String INCIDENT_UPDATE_TOPIC = "incident-update";
     private static final String INCIDENT_FIND_REQUEST_TOPIC = "incident-find-request";
     private static final String INCIDENT_FIND_RESPONSE_TOPIC = "incident-find-response";
@@ -85,7 +85,9 @@ public class IncidentService {
                 .register(meterRegistry);
     }
 
-    @KafkaListener(topics = INCIDENT_CREATE_TOPIC, groupId = "incident-service-group")
+    @KafkaListener(topics = INCIDENT_CREATE_TOPIC,
+                   groupId = "incident-service-group",
+                   containerFactory = "incidentServiceConsumerKafkaTemplate")
     @Transactional
     public void createIncident(ConsumerRecord<String, IncidentCreateRequest> record, Acknowledgment ack) {
         Timer.Sample timer = Timer.start(meterRegistry);
@@ -117,7 +119,7 @@ public class IncidentService {
                     .setTimestamp(incident.getTimestamp())
                     .build();
 
-            kafkaTemplate.send(INCIDENT_RESPONSE_TOPIC, uuid, response)
+            kafkaTemplate.send(INCIDENT_CREATE_RESPONSE_TOPIC, uuid, response)
                     .whenComplete((result,ex) -> {
                         if(ex == null)
                         {
@@ -141,7 +143,10 @@ public class IncidentService {
         }
     }
 
-    @KafkaListener(topics = INCIDENT_UPDATE_TOPIC, groupId = "incident-service-group")
+    @KafkaListener(
+            topics = INCIDENT_UPDATE_TOPIC,
+            groupId = "incident-service-group",
+            containerFactory = "incidentServiceConsumerKafkaTemplate")
     @Transactional
     public void updateIncident(ConsumerRecord<String, IncidentUpdateRequest> record, Acknowledgment ack) {
         Timer.Sample timer = Timer.start(meterRegistry); // FIX
@@ -186,7 +191,7 @@ public class IncidentService {
                         .setTimestamp(Instant.now().toEpochMilli())
                         .build();
 
-                kafkaTemplate.send(INCIDENT_RESPONSE_TOPIC, uuid, response);
+                kafkaTemplate.send(INCIDENT_UPDATE_RESPONSE_TOPIC, uuid, response);
             }
 
             ack.acknowledge();
@@ -201,7 +206,10 @@ public class IncidentService {
     }
 
 
-    @KafkaListener(topics = INCIDENT_FIND_REQUEST_TOPIC, groupId = "incident-service-group")
+    @KafkaListener(
+            topics = INCIDENT_FIND_REQUEST_TOPIC,
+            groupId = "incident-service-group",
+            containerFactory = "incidentServiceConsumerKafkaTemplate" )
     @Transactional(readOnly = true)
     public void findIncidents(
             ConsumerRecord<String, com.example.common.events.IncidentFindRequest> record,

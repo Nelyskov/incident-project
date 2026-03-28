@@ -3,33 +3,11 @@
   "name": "IncidentCreateResponse",
   "namespace": "com.example.common.events",
   "fields": [
-    {
-      "name": "id",
-      "type": "long"
-    },
-    {
-      "name": "service",
-      "type": "string"
-    },
-    {
-      "name": "info",
-      "type": "string"
-    },
-    {
-      "name": "status",
-      "type": {
-        "type": "enum",
-        "name": "IncidentStatus",
-        "symbols": ["CREATED", "PROCESSING", "COMPLETED", "CANCELLED"]
-      }
-    },
-    {
-      "name": "priority",
-      "type": "IncidentPriority"
-    },
-    {
-      "name": "timestamp",
-      "type": "long"
-    }
+    {"name": "id", "type": "long"},
+    {"name": "service", "type": "string"},
+    {"name": "info", "type": "string"},
+    {"name": "status", "type": "IncidentStatus"},
+    {"name": "priority", "type": "IncidentPriority"},
+    {"name": "timestamp", "type": "long"}
   ]
 }

@@ -3,21 +3,9 @@
   "name": "IncidentUpdateRequest",
   "namespace": "com.example.common.events",
   "fields": [
-    {
-      "name": "id",
-      "type": "long"
-    },
-    {
-      "name": "service",
-      "type": ["null", "string"]
-    },
-    {
-      "name": "priority",
-      "type": ["null", "string"]
-    },
-     {
-       "name": "status",
-       "type": ["null", "string"]
-     }
+    {"name": "id", "type": "long"},
+    {"name": "service", "type": ["null", "string"], "default": null},
+    {"name": "priority", "type": ["null", "IncidentPriority"], "default": null},
+    {"name": "status", "type": ["null", "IncidentStatus"], "default": null}
   ]
 }

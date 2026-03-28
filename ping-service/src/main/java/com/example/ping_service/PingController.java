@@ -17,16 +17,19 @@ public class PingController {
     private final IncidentServiceClient incidentServiceClient;
     private final ProcessorServiceClient processorServiceClient;
     private final ProducerServiceClient producerServiceClient;
+    private final AlertServiceClient alertServiceClient;
 
     private final Counter totalRequestCounter;
 
     public PingController(IncidentServiceClient incidentServiceClient,
                           ProcessorServiceClient processorServiceClient,
                           ProducerServiceClient producerServiceClient,
-                          MeterRegistry meterRegistry) {
+                          MeterRegistry meterRegistry,
+                          AlertServiceClient alertServiceClient) {
         this.incidentServiceClient = incidentServiceClient;
         this.processorServiceClient = processorServiceClient;
         this.producerServiceClient = producerServiceClient;
+        this.alertServiceClient = alertServiceClient;
 
         totalRequestCounter = Counter.builder("ping-service.requests.total")
                 .description("Общее количество запросов REST в ping service ")
@@ -41,6 +44,7 @@ public class PingController {
         map.put("incident-service", checkService(incidentServiceClient :: pingService));
         map.put("incident-processor-service", checkService(processorServiceClient :: pingService));
         map.put("incident-producer-service", checkService(producerServiceClient :: pingService));
+        map.put("alert-service", checkService(alertServiceClient::pingService));
 
         return map;
     }

@@ -1,6 +1,7 @@
 package com.example.alert_service;
 
-import com.example.common.events.*;
+
+import com.example.common.events.Alert;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
