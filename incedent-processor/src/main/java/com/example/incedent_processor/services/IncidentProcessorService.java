@@ -56,6 +56,10 @@ public class IncidentProcessorService {
         Incident incident = record.value();
         String responsibleGroup;
 
+        log.debug("Получен HIGH PRIORITY инцидент. uuid: {}, offset: {}", uuid, record.offset());
+        log.info("Обработка HIGH PRIORITY инцидента. id: {}, uuid: {}, service: {}",
+                incident.getId(), uuid, incident.getService());
+
         switch (incident.getService()) {
             case "payment-service":
                 responsibleGroup = "payment-team";
@@ -87,9 +91,9 @@ public class IncidentProcessorService {
             kafkaTemplate.send(ALERT_TOPIC, uuid, alert)
                     .whenComplete((res, e) -> {
                         if(e == null)
-                            log.info("Alert отправлен{}, group: {}",incident.getId(), responsibleGroup);
+                            log.info("Alert отправлен{}, group: {}, uuid {}",incident.getId(), responsibleGroup, uuid);
                         else
-                            log.info("Ошибка при отправлке Alert id{}", incident.getId(), e);
+                            log.info("Ошибка при отправлке Alert id{}, uuid {}", incident.getId(), uuid, e);
                     });
             kafkaIncidentsProcessed.increment();
             ack.acknowledge();

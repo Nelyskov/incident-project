@@ -26,6 +26,7 @@ public class EmailController {
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
+        log.info("GET /health ");
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
                 "service", "alert-service"
@@ -38,6 +39,7 @@ public class EmailController {
             @RequestParam(defaultValue = "Test Alert") String subject,
             @RequestParam(defaultValue = "Test message from alert-service") String message) {
         try {
+            log.info("POST /test-email. Попытка отправки тестового email. to {}, subject {}, message {}",to, subject, message);
             emailService.sendSimpleEmail(to, subject, message);
             return ResponseEntity.ok("Email отправлен на " + to);
         } catch (MailException e) {

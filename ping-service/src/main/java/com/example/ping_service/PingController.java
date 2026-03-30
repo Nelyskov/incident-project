@@ -40,7 +40,7 @@ public class PingController {
     @GetMapping("/ping")
     public Map<String, String> pingAllServices() {
         Map<String, String> map = new HashMap<>();
-
+        log.info("GET /ping получение статуса всех сервисов");
         map.put("incident-service", checkService(incidentServiceClient :: pingService));
         map.put("incident-processor-service", checkService(processorServiceClient :: pingService));
         map.put("incident-producer-service", checkService(producerServiceClient :: pingService));
@@ -74,6 +74,7 @@ public class PingController {
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics() {
         totalRequestCounter.increment();
+        log.info("GET /metrics получение метрик всех сервисов");
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("message", "ping-service metrics");
         metrics.put("endpoints", Map.of(

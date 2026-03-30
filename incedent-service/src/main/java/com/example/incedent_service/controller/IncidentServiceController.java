@@ -5,6 +5,7 @@ import com.example.incedent_service.services.IncidentService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/incident-service")
+@Slf4j
 public class IncidentServiceController {
     private final IncidentService incidentService;
     private final MeterRegistry meterRegistry;
@@ -44,6 +46,7 @@ public class IncidentServiceController {
 
     @GetMapping("/health")
     public ResponseEntity<Map<String,String>> health(){
+        log.debug("Запрос на Incident service по api /health");
         Map<String, String> status = new HashMap<>();
         status.put("status", "UP");
         status.put("service", "incident-service");
@@ -52,6 +55,7 @@ public class IncidentServiceController {
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, String>> stats(){
+        log.debug("Запрос на Incident service по api /stats");
         Map<String, String> stats = new HashMap<>();
         stats.put("message", "API /actuator/prometheus для просмотра всех метрик");
         stats.put("prometheus_endpoint", "http://localhost:8080/actuator/prometheus");
@@ -61,6 +65,7 @@ public class IncidentServiceController {
 
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics(){
+        log.debug("Запрос на Incident service по api /metrics");
         requestCounter.increment();
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("Message", "Incident service metrics");

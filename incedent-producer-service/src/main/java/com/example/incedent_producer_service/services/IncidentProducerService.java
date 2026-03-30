@@ -72,7 +72,7 @@ public class IncidentProducerService {
 
         CompletableFuture<IncidentUpdateResponse> future = new CompletableFuture<>();
         pendingUpdateRequests.put(uuid, future);
-
+        log.info("Producer Service обработка запроса на обновление инцидента uuid {}", uuid);
         com.example.common.events.IncidentUpdateRequest updateRequest =  com.example.common.events.IncidentUpdateRequest.newBuilder()
                 .setId(request.getId())
                 .setService(request.getService())
@@ -103,6 +103,8 @@ public class IncidentProducerService {
 
         String uuid = java.util.UUID.randomUUID().toString();
         CompletableFuture<IncidentFindResponse> future = new CompletableFuture<>();
+        log.info("Producer Service обработка запроса на поиск инцидента uuid {}", uuid);
+
         pendingFindRequests.put(uuid, future);
 
         com.example.common.events.IncidentFindRequest findRequest = com.example.common.events.IncidentFindRequest.newBuilder()

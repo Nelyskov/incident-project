@@ -4,6 +4,7 @@ import com.example.incedent_processor.services.IncidentProcessorService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/incident-processor")
+@Slf4j
 public class IncidentProcessorController {
     private final IncidentProcessorService incidentProcessorService;
     private final MeterRegistry meterRegistry;
@@ -41,6 +43,7 @@ public class IncidentProcessorController {
 
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics() {
+        log.info("GET /metrics");
         totalRequestCounter.increment();
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("Message", "incident-processor metrics");
@@ -69,6 +72,7 @@ public class IncidentProcessorController {
 
     @GetMapping("/health")
     public ResponseEntity<Map<String,String>> health(){
+        log.info("GET /health");
         Map<String, String> status = new HashMap<>();
         status.put("status", "UP");
         status.put("service", "incident-processor");
