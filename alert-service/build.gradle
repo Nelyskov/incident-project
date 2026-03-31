@@ -33,7 +33,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	implementation 'io.micrometer:micrometer-registry-prometheus' // FIX: было runtimeOnly
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 
 	// FIX: добавлены Avro зависимости для десериализации Kafka сообщений
 	implementation 'org.apache.avro:avro:1.11.3'
