@@ -14,6 +14,23 @@
         <module name="incident-project.incedent-processor.main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="incedent-processor" target="21" />
+      <module name="incedent-processor.common" target="21" />
+      <module name="incedent-processor.common.main" target="21" />
+      <module name="incedent-processor.common.test" target="21" />
+      <module name="incedent-processor.main" target="21" />
+      <module name="incedent-processor.test" target="21" />
+      <module name="incedent-service" target="21" />
+      <module name="incedent-service.common" target="21" />
+      <module name="incedent-service.common.main" target="21" />
+      <module name="incedent-service.common.test" target="21" />
+      <module name="incedent-service.main" target="21" />
+      <module name="incedent-service.test" target="21" />
+      <module name="ping-service" target="17" />
+      <module name="ping-service.main" target="17" />
+      <module name="ping-service.test" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

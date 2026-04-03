@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -41,8 +42,13 @@
         <option name="gradleJvm" value="ms-21" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/alert-service" />
+            <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/incedent-processor" />
-            <option value="$PROJECT_DIR$/incedent-processor/common" />
+            <option value="$PROJECT_DIR$/incedent-producer-service" />
+            <option value="$PROJECT_DIR$/incedent-service" />
+            <option value="$PROJECT_DIR$/ping-service" />
           </set>
         </option>
       </GradleProjectSettings>
@@ -55,8 +61,13 @@
         <option name="gradleJvm" value="ms-21" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/alert-service" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/incedent-processor" />
+            <option value="$PROJECT_DIR$/incedent-producer-service" />
             <option value="$PROJECT_DIR$/incedent-service" />
-            <option value="$PROJECT_DIR$/incedent-service/common" />
+            <option value="$PROJECT_DIR$/ping-service" />
           </set>
         </option>
       </GradleProjectSettings>
@@ -74,6 +85,12 @@
         <option name="gradleJvm" value="ms-21" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/alert-service" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/incedent-processor" />
+            <option value="$PROJECT_DIR$/incedent-producer-service" />
+            <option value="$PROJECT_DIR$/incedent-service" />
             <option value="$PROJECT_DIR$/ping-service" />
           </set>
         </option>
