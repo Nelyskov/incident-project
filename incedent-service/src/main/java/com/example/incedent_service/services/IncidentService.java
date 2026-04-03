@@ -144,7 +144,8 @@ public class IncidentService {
                 log.info("HIGH PRIORITY алерт отправлен. id: {}, uuid: {}, service: {}",
                         incident.getId(), uuid, incident.getService());
             }
-
+            
+            ack.acknowledge();
         } catch (Exception e) {
             kafkaProcessingErrors.increment();
 
