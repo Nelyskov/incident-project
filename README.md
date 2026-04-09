@@ -43,7 +43,7 @@
 
 ### Architecture
 
-Система микросервисов построена по принципу Event-Driven Architecture — слабая связанность и высокая отказоустойчивость. Сервисы общаются через Kafka топики асинхронно. Единственная синхронная точка входа — REST API через `incedent-producer-service`.
+Система микросервисов построена по принципу Event-Driven Architecture - слабая связанность и высокая отказоустойчивость. Сервисы общаются через Kafka топики асинхронно. Единственная синхронная точка входа - REST API через `incedent-producer-service`
 
 <div align="center"> 
     <img src="images/incident_management_uml_v2.svg" alt="Architecture schema" width="600" height="1100">
@@ -53,18 +53,18 @@
 
 ### Prerequisites
 
-Перед запуском убедитесь что установлено:
+Перед запуском убедитесь, что установлено:
 
 * [Java 21](https://adoptium.net/)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 * [Git](https://git-scm.com/)
-* Инструмент для тестирования API — например [Postman](https://www.postman.com/) или curl
+* Инструмент для тестирования API - например [Postman](https://www.postman.com/) или curl
 
 ---
 
 ### Getting Started
 
-_Пошаговая инструкция как запустить проект._
+_Инструкция как запустить проект._
 
 **1. Клонировать репозиторий**
 
