@@ -60,23 +60,8 @@ public class IncidentProcessorService {
         log.info("Обработка HIGH PRIORITY инцидента. id: {}, uuid: {}, service: {}",
                 incident.getId(), uuid, incident.getService());
 
-        switch (incident.getService()) {
-            case "payment-service":
-                responsibleGroup = "payment-team";
-                break;
-            case "auth-service":
-                responsibleGroup = "auth-team";
-                break;
-            case "order-service":
-                responsibleGroup = "order-team";
-                break;
-            case "inventory-service":
-                responsibleGroup = "inventory-team";
-                break;
-            default:
-                responsibleGroup = "oncall-team";
-                break;
-        }
+        responsibleGroup = com.example.incedent_processor.services.Service
+                .fromServiceName(incident.getService()).getResponsibleGroup();
 
             Alert alert = Alert.newBuilder()
                     .setId(incident.getId())
