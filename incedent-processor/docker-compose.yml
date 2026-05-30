@@ -9,9 +9,9 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
     networks:
-      - app-network  # ДОЛЖНА быть external сеть из infra
+      - app-network
 
 networks:
   app-network:
     external: true
-    name: app-network  # Уточняем полное имя сети
+    name: app-network

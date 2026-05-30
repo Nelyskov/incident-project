@@ -1,7 +1,6 @@
 package com.example.alert_service;
 
 
-
 public interface EmailService {
     void sendSimpleEmail(String toAddress, String subject, String message);
 
