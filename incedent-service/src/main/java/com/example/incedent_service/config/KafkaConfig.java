@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableKafka
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -29,7 +31,6 @@ public class KafkaConfig {
     @Value("${spring.kafka.consumer.group-id:incident-service-group}")
     private String groupId;
 
-    /// Producer
     @Bean
     public ProducerFactory<String, Object> incidentServiceProducerFactory(){
         Map<String, Object> configProps = new HashMap<>();
@@ -43,14 +44,10 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
-
     @Bean
     public KafkaTemplate<String, Object> incidentServiceProducerKafkaTemplate(){
         return new KafkaTemplate<>(incidentServiceProducerFactory());
     }
-
-
-    /// Consumer
 
     @Bean
     public ConsumerFactory<String, Object> incidentServiceConsumerFactory(){

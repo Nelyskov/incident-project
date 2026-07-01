@@ -9,10 +9,10 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "incidents")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
 public class Incident {
 
     @Id
