@@ -17,6 +17,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/incident-project
+            git fetch origin master
+            git reset --hard origin/master
             git pull origin master
             ./gradlew :common:build
             ./gradlew :incedent-service:bootJar
