@@ -11,6 +11,13 @@ services:
       SPRING_KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.5'
+        reservations:
+          memory: 256m
 
 networks:
   app-network:

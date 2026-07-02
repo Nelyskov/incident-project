@@ -11,6 +11,14 @@ services:
     restart: on-failure
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+          cpus: '0.3'
+        reservations:
+          memory: 128m
+
 
 networks:
   app-network:
