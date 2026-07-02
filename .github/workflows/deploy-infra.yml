@@ -23,6 +23,7 @@ jobs:
             git pull origin master
 
             cd ~/incident-project/infra
+            docker compose down
             docker compose up -d
             sleep 40
 
