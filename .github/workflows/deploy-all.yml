@@ -1,0 +1,7 @@
+name: deploy-all.yml
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'common/**'
+
