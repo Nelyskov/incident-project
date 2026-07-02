@@ -52,10 +52,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 1g
           cpus: '0.5'
-        reservations:
-          memory: 256m
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
@@ -70,7 +68,7 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_HEAP_OPTS: "-Xmx256m -Xms128m"
+      SCHEMA_REGISTRY_HEAP_OPTS: "-Xmx384m -Xms128m"
     networks:
       - app-network
     restart: unless-stopped
@@ -82,10 +80,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256m
-          cpus: '0.3'
-        reservations:
-          memory: 128m
+          memory: 512m
+          cpus: '0.5'
 
   prometheus:
     image: prom/prometheus:latest
@@ -103,6 +99,11 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: '0.2'
 
   grafana:
     image: grafana/grafana:latest
@@ -122,6 +123,11 @@ services:
     restart: unless-stopped
     depends_on:
       - prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+          cpus: '0.4'
 
   loki:
     image: grafana/loki:2.9.0
@@ -135,6 +141,11 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: '0.2'
 
   promtail:
     image: grafana/promtail:2.9.0
@@ -149,6 +160,11 @@ services:
     restart: unless-stopped
     depends_on:
       - loki
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: '0.2'
 
 volumes:
   postgres:
