@@ -20,15 +20,22 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
             git pull origin master
+            
+            cd ~/incident-project/infra
+            docker compose up -d
+            sleep 40
+            
             ./gradlew :common:build
             ./gradlew :incedent-service:bootJar
             ./gradlew :incedent-producer-service:bootJar
             ./gradlew :incedent-processor:bootJar
             ./gradlew :alert-service:bootJar
             ./gradlew :ping-service:bootJar
+            
             cd ~/incident-project/incedent-service && docker compose up -d --build
             cd ~/incident-project/incedent-producer-service && docker compose up -d --build
             cd ~/incident-project/incedent-processor && docker compose up -d --build
             cd ~/incident-project/alert-service && docker compose up -d --build
             cd ~/incident-project/ping-service && docker compose up -d --build
+            
             echo "Deploy completed!"
