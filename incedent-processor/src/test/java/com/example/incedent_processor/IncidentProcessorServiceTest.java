@@ -5,6 +5,8 @@ import com.example.common.events.Incident;
 import com.example.incedent_processor.services.IncidentProcessorService;
 import com.example.incedent_processor.services.Service;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Story;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.SendResult;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,7 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
+@Epic("Incident processor tests")
 @ExtendWith(MockitoExtension.class)
 public class IncidentProcessorServiceTest {
 
@@ -49,6 +50,7 @@ public class IncidentProcessorServiceTest {
     }
 
     @ParameterizedTest
+    @Story("Передаваемый сервис возвращает соответсующую команду")
     @CsvSource({
             "payment-service, payment-team",
             "auth-service, auth-team",
@@ -67,6 +69,7 @@ public class IncidentProcessorServiceTest {
     }
 
     @Test
+    @Story("инцидент без сервиса вызывает oncall team")
     public void incident_nullService_returnOncallTeam() {
         incident.setService(null);
 
@@ -76,6 +79,7 @@ public class IncidentProcessorServiceTest {
     }
 
     @Test
+    @Story("Incident с high priority отправляет в alert topic")
     public void highPriorityIncident_callProcessIncident_shouldSendKafkaMessage() {
         ConsumerRecord<String, Incident> record = new ConsumerRecord<>(
                "high-priority-alert",
@@ -95,6 +99,7 @@ public class IncidentProcessorServiceTest {
     }
 
     @Test
+    @Story("при ошибке обработки инкрементируется счетчик")
     public void error_callKafkaProcessingErrors_shouldIncrement(){
 
         ConsumerRecord<String, Incident> record = new ConsumerRecord<>(
