@@ -51,6 +51,9 @@ dependencies {
 	implementation 'io.confluent:kafka-streams-avro-serde:7.5.0'
 	implementation 'org.projectlombok:lombok:1.18.30'
 
+	testImplementation 'io.qameta.allure:allure-junit5:2.27.0'
+	testImplementation 'io.qameta.allure:allure-spring-web:2.27.0'
+
 }
 test {
 	useJUnitPlatform()
