@@ -259,3 +259,4 @@ Response:
 | Loki | http://localhost:3100 | Хранилище логов |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+# guesser_app

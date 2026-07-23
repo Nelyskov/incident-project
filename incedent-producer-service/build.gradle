@@ -51,3 +51,7 @@ dependencies {
     implementation 'io.confluent:kafka-streams-avro-serde:7.5.0'
     implementation 'org.projectlombok:lombok:1.18.30'
 }
+
+test {
+    useJUnitPlatform()
+}
